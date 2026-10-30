@@ -1,0 +1,62 @@
+[
+  {
+    "id": "cand-001",
+    "name": "张伟",
+    "phone": "13800000001",
+    "email": "zhangwei@example.com",
+    "position": "前端工程师",
+    "status": "APPLIED",
+    "source": "BOSS直聘",
+    "createdAt": "2026-09-10T09:30:00.000Z"
+  },
+  {
+    "id": "cand-002",
+    "name": "李娜",
+    "phone": "13800000002",
+    "email": "lina@example.com",
+    "position": "后端工程师",
+    "status": "APPLIED",
+    "source": "官网投递",
+    "createdAt": "2026-09-12T14:05:00.000Z"
+  },
+  {
+    "id": "cand-003",
+    "name": "王强",
+    "phone": "13800000003",
+    "email": "wangqiang@example.com",
+    "position": "测试工程师",
+    "status": "SCREENING",
+    "source": "拉勾网",
+    "createdAt": "2026-09-08T10:20:00.000Z"
+  },
+  {
+    "id": "cand-004",
+    "name": "陈静",
+    "phone": "13800000004",
+    "email": "chenjing@example.com",
+    "position": "前端工程师",
+    "status": "INTERVIEWING",
+    "source": "内推",
+    "createdAt": "2026-09-05T16:45:00.000Z"
+  },
+  {
+    "id": "cand-005",
+    "name": "刘洋",
+    "phone": "13800000005",
+    "email": "liuyang@example.com",
+    "position": "后端工程师",
+    "status": "HIRED",
+    "source": "猎聘",
+    "createdAt": "2026-08-28T11:00:00.000Z"
+  },
+  {
+    "id": "cand-006",
+    "name": "赵敏",
+    "phone": "13800000006",
+    "email": "zhaomin@example.com",
+    "position": "产品经理",
+    "status": "REJECTED",
+    "source": "猎头推荐",
+    "createdAt": "2026-09-01T08:50:00.000Z"
+  }
+]

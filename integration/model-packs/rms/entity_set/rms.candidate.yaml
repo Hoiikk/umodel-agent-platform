@@ -1,0 +1,21 @@
+kind: entity_set
+schema: { url: "umodel.aliyun.com", version: "v0.1.0" }
+metadata:
+  name: rms.candidate
+  domain: rms
+  display_name: { en_us: Candidate, zh_cn: 候选人 }
+  description: { en_us: A recruitment candidate managed by RMS., zh_cn: 由 RMS 管理的候选人。 }
+spec:
+  fields:
+    - { name: candidate_id, type: string }
+    - { name: name, type: string, tags: { classification: pii.name } }
+    - { name: phone, type: string, tags: { classification: pii.phone } }
+    - { name: email, type: string, tags: { classification: pii.email } }
+    - { name: position, type: string }
+    - { name: status, type: string }
+    - { name: source, type: string }
+    - { name: created_at, type: time }
+  primary_key_fields: [candidate_id]
+  id_generator: candidate_id
+  name_fields: [candidate_id, position, status]
+  ordered_fields: [candidate_id, position, status, source, created_at]

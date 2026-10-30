@@ -1,0 +1,23 @@
+kind: storage_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v1.0.0"
+metadata:
+  name: "commerce.user.profile_to_rest"
+  domain: commerce
+  display_name:
+    en_us: "User profile stored in REST API"
+    zh_cn: "用户资料存储在 REST API"
+spec:
+  src:
+    domain: commerce
+    kind: event_set
+    name: commerce.user.profile
+  dest:
+    domain: commerce
+    kind: external_storage
+    name: commerce.user.rest
+  fields_mapping:
+    user_id: user_id
+    name: name
+    status: status

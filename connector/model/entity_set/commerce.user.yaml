@@ -1,0 +1,54 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "commerce.user"
+  domain: commerce
+  display_name:
+    en_us: "User"
+    zh_cn: "用户"
+  description:
+    en_us: "A customer or operator in the commerce domain."
+    zh_cn: "电商域中的用户。"
+spec:
+  fields:
+    - name: user_id
+      type: string
+      display_name:
+        en_us: "User ID"
+        zh_cn: "用户 ID"
+      description:
+        en_us: "Stable user identifier."
+        zh_cn: "稳定用户标识。"
+      example: "U-1001"
+    - name: name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "姓名"
+      description:
+        en_us: "Display name."
+        zh_cn: "展示名称。"
+      example: "张三"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Account status."
+        zh_cn: "账号状态。"
+      example: "active"
+  primary_key_fields:
+    - user_id
+  id_generator: "user_id"
+  name_fields:
+    - name
+    - user_id
+  ordered_fields:
+    - user_id
+    - name
+    - status
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

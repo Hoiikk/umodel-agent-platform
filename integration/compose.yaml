@@ -1,0 +1,42 @@
+services:
+  mysql:
+    image: mysql:8.4
+    env_file: ../rms/.env
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-rms}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set rms/.env}
+    volumes:
+      - rms_mysql_data:/var/lib/mysql
+      - ../rms/db/init:/docker-entrypoint-initdb.d:ro
+    ports: ["127.0.0.1:3308:3306"]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  rms-backend:
+    build:
+      context: ../rms
+      dockerfile: apps/backend/Dockerfile
+    env_file: ../rms/.env
+    environment:
+      RMS_DB_HOST: mysql
+      RMS_DB_PORT: 3306
+    depends_on:
+      mysql: { condition: service_healthy }
+    ports: ["3001:3001"]
+
+  umodel:
+    build:
+      context: ../third_party/UnifiedModel
+      dockerfile: deployments/docker/Dockerfile
+    command: ["--addr", ":8080", "--data", "/data", "--graphstore", "file.memory", "--import-root", "/model-packs"]
+    volumes:
+      - umodel_data:/data
+      - ./model-packs:/model-packs:ro
+    ports: ["8080:8080"]
+
+volumes:
+  rms_mysql_data: {}
+  umodel_data: {}

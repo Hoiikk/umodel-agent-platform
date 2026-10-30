@@ -1,0 +1,25 @@
+kind: data_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v1.0.0"
+metadata:
+  name: "commerce.user_related_to_commerce.order.records"
+  domain: commerce
+  display_name:
+    en_us: "User related to order records"
+    zh_cn: "用户关联订单记录"
+  description:
+    en_us: "Object-graph link from a user to order records. Live order rows are read through commerce.order."
+    zh_cn: "对象图里的用户到订单记录关系。现场订单行通过 commerce.order 查询，不走这条 link。"
+spec:
+  src:
+    domain: commerce
+    kind: entity_set
+    name: commerce.user
+  dest:
+    domain: commerce
+    kind: event_set
+    name: commerce.order.records
+  fields_mapping:
+    user_id: user_id
+  data_link_type: related_to

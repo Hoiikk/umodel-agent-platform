@@ -1,0 +1,2 @@
+.[dev]
+# Live MySQL pools: pip install -e ".[dev,mysql]"

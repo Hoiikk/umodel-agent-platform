@@ -1,0 +1,30 @@
+kind: mysql
+schema:
+  url: "umodel.aliyun.com"
+  version: "v1.0.0"
+metadata:
+  name: "commerce.order.mysql"
+  domain: commerce
+  display_name:
+    en_us: "Order MySQL"
+    zh_cn: "订单 MySQL"
+  description:
+    en_us: "Sample MySQL metadata for commerce orders. The executor opens this endpoint when aiomysql and secret://COMMERCE_MYSQL_PASSWORD are present."
+    zh_cn: "订单表的示例 MySQL 元数据。安装 aiomysql 且环境中有 secret://COMMERCE_MYSQL_PASSWORD 时，执行器连接这里的地址。"
+spec:
+  endpoint: "127.0.0.1:3306"
+  database: "commerce"
+  table: "t_order"
+  sql_dialect: mysql
+  time_field: created_at
+  time_unit: datetime
+  default_limit: 1000
+  max_limit: 10000
+  read_only: true
+  tls_mode: preferred
+  lookup_field: user_id
+  username: readonly
+  credential_ref: secret://COMMERCE_MYSQL_PASSWORD
+  tags:
+    sample: umodel-assistant-py
+    role: orders

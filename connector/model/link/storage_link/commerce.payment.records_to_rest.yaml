@@ -1,0 +1,25 @@
+kind: storage_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v1.0.0"
+metadata:
+  name: "commerce.payment.records_to_rest"
+  domain: commerce
+  display_name:
+    en_us: "Payment records stored in REST API"
+    zh_cn: "支付记录存储在 REST API"
+spec:
+  src:
+    domain: commerce
+    kind: event_set
+    name: commerce.payment.records
+  dest:
+    domain: commerce
+    kind: external_storage
+    name: commerce.payment.rest
+  fields_mapping:
+    payment_id: payment_id
+    order_id: order_id
+    amount: amount
+    status: status
+    channel: channel

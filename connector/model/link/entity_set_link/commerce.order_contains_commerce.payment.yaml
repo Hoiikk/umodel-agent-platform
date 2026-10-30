@@ -1,0 +1,25 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "commerce.order_contains_commerce.payment"
+  domain: commerce
+  display_name:
+    en_us: "Order Contains Payment"
+    zh_cn: "订单包含支付"
+  description:
+    en_us: "An order has zero or more payments."
+    zh_cn: "一张订单有零到多笔支付。"
+spec:
+  src:
+    domain: commerce
+    kind: entity_set
+    name: commerce.order
+  dest:
+    domain: commerce
+    kind: entity_set
+    name: commerce.payment
+  fields_mapping:
+    order_id: order_id
+  entity_link_type: contains

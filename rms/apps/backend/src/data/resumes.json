@@ -1,0 +1,26 @@
+[
+  {
+    "candidateId": "cand-001",
+    "resumeText": "5年前端开发经验，精通 React 与 TypeScript，熟悉 Vite 构建与 Webpack 配置，主导过组件化重构与性能优化，熟练掌握 CSS / HTML，有小程序开发经验。本科学历，计算机科学专业。"
+  },
+  {
+    "candidateId": "cand-002",
+    "resumeText": "3年后端开发经验，熟悉 Node.js 与 Express 框架，使用过 MySQL 与 Redis，了解 Docker 容器化部署，参与过 RESTful 接口设计。本科学历。"
+  },
+  {
+    "candidateId": "cand-003",
+    "resumeText": "2年测试工程师经验，熟悉自动化测试与接口测试，能独立编写测试用例，使用过 Postman 与 JMeter，了解性能测试流程。本科学历。"
+  },
+  {
+    "candidateId": "cand-004",
+    "resumeText": "6年前端开发经验，React / Vue 双栈，TypeScript 深度使用，熟悉 Vite 工程化，负责过大型项目性能优化与组件化组件库建设。硕士学历。"
+  },
+  {
+    "candidateId": "cand-005",
+    "resumeText": "8年后端架构经验，精通 Java 与 Spring Cloud 微服务体系，熟悉 Kubernetes 与 Docker 容器化部署，主导过 MySQL 与 Redis 的性能调优。硕士学历。"
+  },
+  {
+    "candidateId": "cand-006",
+    "resumeText": "1年产品助理经验，参与过需求文档整理与用户调研，会使用 Axure 绘制原型。"
+  }
+]

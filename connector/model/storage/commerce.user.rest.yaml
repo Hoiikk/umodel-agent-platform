@@ -1,0 +1,23 @@
+kind: external_storage
+schema:
+  url: "umodel.aliyun.com"
+  version: "v1.0.0"
+metadata:
+  name: "commerce.user.rest"
+  domain: commerce
+  display_name:
+    en_us: "User REST API"
+    zh_cn: "用户 REST API"
+  description:
+    en_us: "Sample HTTP storage for user profiles. Replace properties.endpoint with the real API and add that host:port to ALLOWED_HTTP_HOSTS."
+    zh_cn: "用户资料的示例 HTTP 存储。正式使用时更换 properties.endpoint，并把主机和端口写入 ALLOWED_HTTP_HOSTS。"
+spec:
+  type: http
+  name: user_api
+  properties:
+    endpoint: "http://127.0.0.1:8001/api/users"
+    method: "GET"
+    path_template: "/{user_id}"
+  tags:
+    sample: umodel-assistant-py
+    role: user-profile

@@ -1,0 +1,15 @@
+{
+  "name": "rms-demo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:shared": "npm run build -w @rms/shared",
+    "ci": "npm run build:shared && npm test",
+    "test": "npm test -w @rms/backend",
+    "start:backend": "npm run dev -w @rms/backend",
+    "start:frontend": "npm run dev -w @rms/frontend"
+  }
+}

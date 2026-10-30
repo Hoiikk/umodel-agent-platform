@@ -1,0 +1,24 @@
+kind: data_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v1.0.0"
+metadata:
+  name: "commerce.user_related_to_commerce.user.profile"
+  domain: commerce
+  display_name:
+    en_us: "User related to user profile records"
+    zh_cn: "用户关联用户资料记录"
+spec:
+  src:
+    domain: commerce
+    kind: entity_set
+    name: commerce.user
+  dest:
+    domain: commerce
+    kind: event_set
+    name: commerce.user.profile
+  fields_mapping:
+    user_id: user_id
+    name: name
+    status: status
+  data_link_type: related_to

@@ -1,0 +1,21 @@
+kind: event_set
+schema: { url: "umodel.aliyun.com", version: "v1.0.0" }
+metadata:
+  name: rms.candidate.records
+  domain: rms
+  display_name: { en_us: Candidate records, zh_cn: 候选人记录 }
+spec:
+  fields:
+    - { name: candidate_id, type: string }
+    - { name: name, type: string, tags: { classification: pii.name } }
+    - { name: phone, type: string, tags: { classification: pii.phone } }
+    - { name: email, type: string, tags: { classification: pii.email } }
+    - { name: position, type: string }
+    - { name: status, type: string }
+    - { name: source, type: string }
+    - { name: created_at, type: time }
+  time_field: created_at
+  name_fields: [candidate_id, position, status]
+  tag_fields: [position, status, source]
+  ordered_fields: [created_at, candidate_id, position, status, source]
+  default_order: desc

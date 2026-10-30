@@ -1,0 +1,74 @@
+kind: entity_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "commerce.payment"
+  domain: commerce
+  display_name:
+    en_us: "Payment"
+    zh_cn: "支付"
+  description:
+    en_us: "A payment collected for an order."
+    zh_cn: "一笔针对订单的支付。"
+spec:
+  fields:
+    - name: payment_id
+      type: string
+      display_name:
+        en_us: "Payment ID"
+        zh_cn: "支付 ID"
+      description:
+        en_us: "Stable payment identifier."
+        zh_cn: "稳定支付标识。"
+      example: "P-3001"
+    - name: order_id
+      type: string
+      display_name:
+        en_us: "Order ID"
+        zh_cn: "订单 ID"
+      description:
+        en_us: "Order this payment belongs to."
+        zh_cn: "这笔支付所属的订单。"
+      example: "O-2001"
+    - name: amount
+      type: string
+      display_name:
+        en_us: "Amount"
+        zh_cn: "金额"
+      description:
+        en_us: "Paid amount."
+        zh_cn: "支付金额。"
+      example: "128.00"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+      description:
+        en_us: "Payment status."
+        zh_cn: "支付状态。"
+      example: "paid"
+    - name: channel
+      type: string
+      display_name:
+        en_us: "Channel"
+        zh_cn: "渠道"
+      description:
+        en_us: "Payment channel."
+        zh_cn: "支付渠道。"
+      example: "card"
+  primary_key_fields:
+    - payment_id
+  id_generator: "payment_id"
+  name_fields:
+    - payment_id
+    - status
+  ordered_fields:
+    - payment_id
+    - order_id
+    - amount
+    - status
+    - channel
+  first_observed_time_field: "__first_observed_time__"
+  last_observed_time_field: "__last_observed_time__"

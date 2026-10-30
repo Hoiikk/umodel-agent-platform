@@ -1,0 +1,23 @@
+kind: external_storage
+schema:
+  url: "umodel.aliyun.com"
+  version: "v1.0.0"
+metadata:
+  name: "commerce.payment.rest"
+  domain: commerce
+  display_name:
+    en_us: "Payment REST API"
+    zh_cn: "支付 REST API"
+  description:
+    en_us: "Sample HTTP storage for payments. Replace properties.endpoint with the real API and add that host:port to ALLOWED_HTTP_HOSTS."
+    zh_cn: "支付的示例 HTTP 存储。正式使用时更换 properties.endpoint，并把主机和端口写入 ALLOWED_HTTP_HOSTS。"
+spec:
+  type: http
+  name: payment_api
+  properties:
+    endpoint: "http://127.0.0.1:8001/api/payments"
+    method: "GET"
+    path_template: "/{payment_id}"
+  tags:
+    sample: umodel-assistant-py
+    role: payments

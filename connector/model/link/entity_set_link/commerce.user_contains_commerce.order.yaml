@@ -1,0 +1,25 @@
+kind: entity_set_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v0.1.0"
+metadata:
+  name: "commerce.user_contains_commerce.order"
+  domain: commerce
+  display_name:
+    en_us: "User Contains Order"
+    zh_cn: "用户包含订单"
+  description:
+    en_us: "A user owns zero or more orders."
+    zh_cn: "一个用户拥有零到多张订单。"
+spec:
+  src:
+    domain: commerce
+    kind: entity_set
+    name: commerce.user
+  dest:
+    domain: commerce
+    kind: entity_set
+    name: commerce.order
+  fields_mapping:
+    user_id: user_id
+  entity_link_type: contains

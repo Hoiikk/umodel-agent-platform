@@ -1,0 +1,54 @@
+kind: event_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v1.0.0"
+metadata:
+  name: "commerce.user.profile"
+  domain: commerce
+  display_name:
+    en_us: "User Profile Records"
+    zh_cn: "用户资料记录"
+  description:
+    en_us: "User profile rows fetched live from the user REST API."
+    zh_cn: "从用户 REST API 现场读取的用户资料行。"
+spec:
+  fields:
+    - name: user_id
+      type: string
+      display_name:
+        en_us: "User ID"
+        zh_cn: "用户 ID"
+    - name: name
+      type: string
+      display_name:
+        en_us: "Name"
+        zh_cn: "姓名"
+      tags:
+        classification: pii.name
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+    - name: updated_at
+      type: time
+      display_name:
+        en_us: "Updated At"
+        zh_cn: "更新时间"
+  time_field: updated_at
+  name_fields:
+    - name
+    - user_id
+  tag_fields:
+    - user_id
+    - status
+  ordered_fields:
+    - user_id
+    - name
+    - status
+    - updated_at
+  default_order: desc
+  entity_fields:
+    entity_id: user_id
+    domain: domain
+    entity_type: entity_type

@@ -1,0 +1,25 @@
+kind: storage_link
+schema:
+  url: "umodel.aliyun.com"
+  version: "v1.0.0"
+metadata:
+  name: "commerce.order.records_to_mysql"
+  domain: commerce
+  display_name:
+    en_us: "Order records stored in MySQL"
+    zh_cn: "订单记录存储在 MySQL"
+spec:
+  src:
+    domain: commerce
+    kind: event_set
+    name: commerce.order.records
+  dest:
+    domain: commerce
+    kind: mysql
+    name: commerce.order.mysql
+  fields_mapping:
+    order_id: order_id
+    user_id: user_id
+    amount: amount
+    status: status
+    created_at: created_at

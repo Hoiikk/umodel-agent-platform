@@ -1,0 +1,58 @@
+kind: event_set
+schema:
+  url: "umodel.aliyun.com"
+  version: "v1.0.0"
+metadata:
+  name: "commerce.order.records"
+  domain: commerce
+  display_name:
+    en_us: "Order Records"
+    zh_cn: "订单记录"
+  description:
+    en_us: "Order rows fetched live from the order MySQL table."
+    zh_cn: "从订单 MySQL 表现场读取的订单行。"
+spec:
+  fields:
+    - name: order_id
+      type: string
+      display_name:
+        en_us: "Order ID"
+        zh_cn: "订单 ID"
+    - name: user_id
+      type: string
+      display_name:
+        en_us: "User ID"
+        zh_cn: "用户 ID"
+    - name: amount
+      type: string
+      display_name:
+        en_us: "Amount"
+        zh_cn: "金额"
+    - name: status
+      type: string
+      display_name:
+        en_us: "Status"
+        zh_cn: "状态"
+    - name: created_at
+      type: time
+      display_name:
+        en_us: "Created At"
+        zh_cn: "创建时间"
+  time_field: created_at
+  name_fields:
+    - order_id
+    - status
+  tag_fields:
+    - user_id
+    - status
+  ordered_fields:
+    - created_at
+    - order_id
+    - user_id
+    - amount
+    - status
+  default_order: desc
+  entity_fields:
+    entity_id: order_id
+    domain: domain
+    entity_type: entity_type
