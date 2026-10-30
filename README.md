@@ -26,3 +26,11 @@ integration/scripts/ci-local.sh
 
 It runs RMS and Connector verification, package builds, UModel environment
 checks, image builds, and the full UModel → Connector → MySQL smoke test.
+
+## Cloud delivery
+
+`Publish release images` publishes the RMS Backend and pinned UModel images to
+GitHub Container Registry only for a `v*` tag or a manual release. It does not
+deploy a server. `Deploy platform` is a protected, disabled-by-default Docker
+Compose deployment skeleton for `staging` and `production`; see
+[`deployment/README.md`](deployment/README.md) before enabling it.

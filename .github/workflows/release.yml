@@ -1,0 +1,80 @@
+name: Publish release images
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version, for example v0.1.0
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  RMS_IMAGE: ghcr.io/hoiikk/umodel-agent-platform-rms
+  UMODEL_IMAGE: ghcr.io/hoiikk/umodel-agent-platform-umodel
+
+jobs:
+  publish:
+    name: Build and publish immutable images
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - uses: docker/setup-buildx-action@v3
+      - name: Sign in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: rms-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.RMS_IMAGE }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+            type=raw,value=${{ inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' }}
+      - id: umodel-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.UMODEL_IMAGE }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+            type=raw,value=${{ inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' }}
+      - name: Publish RMS Backend
+        uses: docker/build-push-action@v6
+        with:
+          context: rms
+          file: rms/apps/backend/Dockerfile
+          push: true
+          tags: ${{ steps.rms-meta.outputs.tags }}
+          labels: ${{ steps.rms-meta.outputs.labels }}
+      - name: Publish UModel
+        uses: docker/build-push-action@v6
+        with:
+          context: third_party/UnifiedModel
+          file: third_party/UnifiedModel/deployments/docker/Dockerfile
+          push: true
+          tags: ${{ steps.umodel-meta.outputs.tags }}
+          labels: ${{ steps.umodel-meta.outputs.labels }}
+      - name: Release summary
+        run: |
+          {
+            echo '## Published images'
+            echo ''
+            echo '\`\`\`text'
+            echo "${{ steps.rms-meta.outputs.tags }}"
+            echo "${{ steps.umodel-meta.outputs.tags }}"
+            echo '\`\`\`'
+          } >> "$GITHUB_STEP_SUMMARY"

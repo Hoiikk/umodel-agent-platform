@@ -37,6 +37,12 @@ describe('GET /api/candidates - HTTP 读取契约', () => {
     server.close(done);
   });
 
+  it('健康检查返回稳定的存活响应', async () => {
+    const res = await fetch(`${baseUrl}/healthz`);
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({ status: 'ok' });
+  });
+
   it('返回 200 且为 JSON 数组，条数与种子一致', async () => {
     const res = await fetch(`${baseUrl}/api/candidates`);
     expect(res.status).toBe(200);
