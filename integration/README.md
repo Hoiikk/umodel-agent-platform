@@ -1,36 +1,27 @@
-# UModel RMS Integration Lab
+# UModel 与招聘系统的本地集成
 
-This directory owns the local, cross-repository integration environment for:
+这个目录负责把下面三部分在本地接到一起：
 
-- `../third_party/UnifiedModel`: the pinned upstream UModel semantic runtime;
-- `../rms`: the recruitment management system; and
-- `../connector`: the model-guided data-fetch executor.
+- `../third_party/UnifiedModel`：钉住版本的上游 UModel 语义运行时；
+- `../rms`：招聘管理系统；
+- `../connector`：按模型取数的执行层。
 
-It intentionally contains no business implementation. Future phases will add
-Docker Compose definitions, deterministic fixtures, cross-service contract
-tests, deployment scripts, and architecture decision records here so that the
-three projects remain independently buildable.
+这里有 Compose 定义、招聘系统模型包、冒烟测试和本地 CI。业务逻辑留在 `rms/` 和 `connector/`。
 
-## Local prerequisites
+## 本地依赖
 
-- Docker Desktop with Docker Compose v2;
-- Go 1.22 or newer for UModel;
-- Node.js and npm for RMS; and
-- Python 3.10 or newer for the assistant.
+- 带 Docker Compose v2 的 Docker Desktop；
+- UModel 需要 Go 1.22 或更新版本；
+- 招聘系统需要 Node.js 和 npm；
+- 连接器需要 Python 3.10 或更新版本。
 
-## Safety boundary
+## 安全边界
 
-No real business-system credentials, production data, or public deployment
-configuration belong in this directory. The local integration environment will
-use seeded data and least-privilege service accounts only.
+真实业务系统的账号、生产数据和公网部署配置不要放进这个目录。本地环境只用种子数据和权限最小的服务账号。
 
-## First integrated environment
+## 第一次把环境拉起来
 
-Copy `../rms/.env.example` to `../rms/.env`, set unique local-only
-passwords, then run `docker compose --env-file ../rms/.env up --build`.
-This starts MySQL, RMS on
-port 3001, and UModel on port 8080. Verify the service and import the mounted
-RMS model pack with the upstream CLI:
+把 `../rms/.env.example` 复制成 `../rms/.env`，填上只在本机使用的密码，然后在本目录执行 `docker compose --env-file ../rms/.env up --build`。这会启动 MySQL、端口 3001 上的招聘系统，以及端口 8080 上的 UModel。接着用上游命令行检查服务，并导入挂载进来的招聘模型包：
 
 ```sh
 cd ../third_party/UnifiedModel
@@ -40,21 +31,14 @@ go run ./cmd/umctl --addr http://127.0.0.1:8080 umodel import rms --path /model-
 go run ./cmd/umctl --addr http://127.0.0.1:8080 query run rms '.umodel | limit 10'
 ```
 
-The UModel import root is confined to the read-only `/model-packs` mount; do
-not point imports at arbitrary container paths. The Connector remains a
-separate stdio MCP process by design.
+UModel 只能从只读挂载的 `/model-packs` 导入，不要把导入路径指到容器里的其他位置。连接器按设计是单独的标准输入输出 MCP 进程。
 
-## End-to-end smoke test
+## 端到端冒烟测试
 
-After the stack is running, execute:
+服务起来之后执行：
 
 ```sh
 ./scripts/run-smoke.sh
 ```
 
-The script is idempotent: it checks UModel health, creates/imports the `rms`
-workspace when needed, then verifies a model-guided candidate lookup through
-the Connector and MySQL. It asserts the read-only path returns one row and
-that name, phone, and email remain masked. The Compose-only MySQL port is
-bound to `127.0.0.1:3308`; the Connector selects it through
-`RMS_MYSQL_ENDPOINT`, while the model keeps its local-development default.
+这个脚本可以重复跑。它先检查 UModel 是否健康，需要时创建并导入 `rms` 工作区，再经连接器和 MySQL 做一次按模型的候选人查询。它确认只读路径返回一行，并且姓名、电话、邮箱保持打码。Compose 里的 MySQL 只绑定 `127.0.0.1:3308`。连接器通过 `RMS_MYSQL_ENDPOINT` 使用这个地址，模型文件本身仍保留本地开发的默认地址。

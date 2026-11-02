@@ -1,15 +1,11 @@
-# RMS semantic model
+# 招聘系统语义模型
 
-This first pack models only data RMS currently owns: candidates and their
-controlled recruitment stage. `position` remains a candidate attribute until
-RMS has a separately governed job-opening source. Phone and email are PII and
-must not be returned by default to an agent.
+这份模型目前只描述招聘系统已经拥有的数据：候选人和受控的招聘阶段。职位来源还没有单独治理之前，`position` 仍是候选人的一个属性。电话和邮箱属于个人敏感信息，默认不要原样交给 Agent。
 
-Safe read examples:
+适合的只读查询：
 
-- Count candidates by `position` and `status`.
-- Find candidates in a declared stage and time range.
-- Read a candidate's current stage and permitted next actions from RMS.
+- 按 `position` 和 `status` 统计候选人。
+- 在声明的阶段和时间范围内查找候选人。
+- 从招聘系统读取候选人的当前阶段，以及允许的下一步动作。
 
-This pack is read-only. Any future state transition must call the RMS service,
-never write through the UModel Connector database account.
+这份模型只读。以后如果要改变状态，必须调用招聘系统自己的服务，不要通过 UModel 连接器的数据库账号去写。
