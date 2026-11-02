@@ -1,6 +1,6 @@
 # UModel 开源范围与自行建设说明
 
-本文说明 `alibaba/UnifiedModel` 哪些能力已经开源、哪些没有随仓库交付因而需要自行建设，以及本工作区已经补上的部分。取数执行层的实现和生产接入步骤见 [取数执行层说明与生产接入.md](取数执行层说明与生产接入.md)。Go SDK 校验的补全见 [UModel_Go_SDK_补全说明.md](UModel_Go_SDK_补全说明.md)。对应的 Go 文件在另行检出的 UnifiedModel 工作副本中，不在本目录。
+本文说明 `alibaba/UnifiedModel` 哪些能力已经开源、哪些没有随仓库交付因而需要自行建设，以及本工作区已经补上的部分。取数执行层的实现和生产接入步骤见 [取数执行层说明与生产接入.md](取数执行层说明与生产接入.md)。
 
 审阅对象固定为提交 [`f065a68c51268c60be941180934462161f89f483`](https://github.com/alibaba/UnifiedModel/tree/f065a68c51268c60be941180934462161f89f483)（2026-10-12，v0.6.0）。开源仓库中看不到未公开实现的源码。下文只使用三类结论：
 
@@ -73,20 +73,20 @@ Skill 设计写明：UModel 返回定义，不解释并执行外部工具，不�
 | Ladybug 图存储 | 未带构建标签时为不可用 stub | 不承担。图存储选用 file、Neo4j 或 Gremlin |
 | Link 高级数据检查 | `schemas/includes/link.schema.yaml` 中相关检查仍是 TODO | 发布前由模型校验流程处理 |
 | Python、Java SDK 校验 | 扫描时 `validate()` 为空；Java Link 的 `getSrc()`、`getDest()` 返回 null | 本次未改。使用这些 SDK 时仍需服务端校验 |
-| Go SDK `Validate()` | 上游生成代码原为 `return nil` | 本工作区已补 75 个方法，见 SDK 补全说明 |
+| Go SDK `Validate()` | 生成代码仍是 `return nil` | 不承担。导入模型时由 UModel 服务端校验 |
 
 计划中的 `aggregate`、`storage_*` 由开源执行器回显，供外部执行层使用，开源 planner 本身不消费。
 
 ## 3. 本工作区已经补上的部分
 
-`umodel-assistant-py` 补的是第 2.2 节的执行层，以及其中能在本进程完成的最小安全控制。已实现的内容包括：向开源服务只请求计划、转发对象图结果、执行 PromQL、Elasticsearch 和 ClickHouse 计划、按模型包生成并执行 MySQL 与 HTTP 查询、参数化只读 SQL、出站白名单、环境变量密钥、按标签脱敏和本进程审计日志。
+`connector` 补的是第 2.2 节的执行层，以及其中能在本进程完成的最小安全控制。已实现的内容包括：向开源服务只请求计划、转发对象图结果、执行 PromQL、Elasticsearch 和 ClickHouse 计划、按模型包生成并执行 MySQL 与 HTTP 查询、参数化只读 SQL、出站白名单、环境变量密钥、按标签脱敏和本进程审计日志。
 
 它没有实现云端控制面，也没有把开发用身份当成企业登录。尚未接入的 OIDC、Vault、KMS、远程审计、按人授权、限流和高可用，列在《取数执行层说明与生产接入》第 5 节。
 
 ## 4. 建议的建设边界
 
 1. 继续使用开源 UModel 做建模、对象图和计划编译。
-2. 由 `umodel-assistant-py` 按计划取数。生产接入时替换身份、密钥和审计，不在 Agent 侧保存 SQL 或密码。
+2. 由 `connector` 按计划取数。生产接入时替换身份、密钥和审计，不在 Agent 侧保存 SQL 或密码。
 3. 企业控制面、多租户产品、内部前端、跨源 Join、生产级检索，单独建设或对接现有平台。
 4. 某项云上能力能否采购或是否有开放接口，向产品方索取说明。不能从公开仓库反推。
 

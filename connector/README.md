@@ -1,4 +1,4 @@
-# umodel-assistant-py
+# connector
 
 开源 UModel 前面的取数执行层。开源服务负责把业务系统建模成对象图，并生成查询计划；本目录按计划访问业务系统，把行交回 Agent。Agent 不编写 SQL，不提交数据库地址或密码，也不在工具参数里声明自己的身份。
 
@@ -18,7 +18,7 @@
 ## 目录结构
 
 ```text
-umodel-assistant-py/
+connector/
 ├── README.md
 ├── pyproject.toml              可安装包、依赖范围、测试与静态检查配置
 ├── requirements.lock           已验证开发环境的锁定依赖
@@ -39,8 +39,7 @@ umodel-assistant-py/
 │   └── support/                仅供测试的模拟后端
 └── docs/
     ├── 取数执行层说明与生产接入.md
-    ├── UModel开源范围与自行建设说明.md
-    └── UModel_Go_SDK_补全说明.md
+    └── UModel开源范围与自行建设说明.md
 ```
 
 ## 一次查询怎么走
@@ -136,7 +135,6 @@ python -m umodel_assistant
 
 - [取数执行层说明与生产接入](docs/取数执行层说明与生产接入.md)：现有代码、正式使用步骤、尚未接入的企业能力
 - [UModel 开源范围与自行建设说明](docs/UModel开源范围与自行建设说明.md)：哪些能力已经开源，哪些需要自行建设
-- [UModel Go SDK 补全说明](docs/UModel_Go_SDK_补全说明.md)：Go SDK 中 `Validate()` 的补全，发生在用 Go 拼模型、提交之前。对应 Go 文件不在本目录
 
 ## 这个目录没有做的事
 
