@@ -20,6 +20,7 @@ trap cleanup EXIT
 
 (cd "$RMS_DIR" && npm ci && npm run ci)
 (cd "$ASSISTANT_DIR" && .venv/bin/python -m pytest && .venv/bin/python -m ruff check . && .venv/bin/python -m build --no-isolation)
+(cd "$ROOT_DIR/agent" && "$ASSISTANT_DIR/.venv/bin/python" -m pytest && "$ASSISTANT_DIR/.venv/bin/python" -m ruff check .)
 (cd "$UMODEL_DIR" && make check-env)
 
 docker compose --env-file "$ENV_FILE" -f "$LAB_DIR/compose.yaml" up -d --build
