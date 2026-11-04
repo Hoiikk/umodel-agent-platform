@@ -7,6 +7,7 @@
 - `rms/` — 招聘管理系统及其 MySQL 结构。
 - `connector/` — 按模型取数的只读执行层和 MCP 服务。
 - `integration/` — Compose 环境、语义模型包、冒烟测试和本地 CI。
+- `agent/` — 不依赖 Agent 框架的招聘数据助手。它只通过连接器按编号查询。
 - `third_party/UnifiedModel` — 钉住版本的上游 UModel Git 子模块。产品代码不要改这里。
 
 ## 本地启动
@@ -23,7 +24,7 @@ integration/scripts/run-smoke.sh
 integration/scripts/ci-local.sh
 ```
 
-它会跑招聘系统和连接器的测试、打包、UModel 环境检查、镜像构建，以及 UModel → 连接器 → MySQL 的完整冒烟测试。
+它会跑招聘系统、连接器、Data Agent 的测试，以及打包、UModel 环境检查、镜像构建，和 UModel → 连接器 → MySQL 的完整冒烟测试。Data Agent 的配置和手工验收见 [`agent/README.md`](agent/README.md)。
 
 ## 云上交付
 

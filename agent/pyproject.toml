@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling==1.33.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "data-agent"
+version = "0.1.0"
+description = "Framework-free data agent that reads RMS only through the UModel connector"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+data-agent = "data_agent.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/data_agent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
