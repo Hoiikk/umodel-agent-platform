@@ -58,5 +58,25 @@
     "status": "REJECTED",
     "source": "猎头推荐",
     "createdAt": "2026-09-01T08:50:00.000Z"
+  },
+  {
+    "id": "cand-007",
+    "name": "周宁",
+    "phone": "13800000007",
+    "email": "zhouning@example.com",
+    "position": "前端工程师",
+    "status": "HIRED",
+    "source": "猎聘",
+    "createdAt": "2026-08-20T10:15:00.000Z"
+  },
+  {
+    "id": "cand-008",
+    "name": "吴婷",
+    "phone": "13800000008",
+    "email": "wuting@example.com",
+    "position": "后端工程师",
+    "status": "INTERVIEWING",
+    "source": "内推",
+    "createdAt": "2026-09-15T09:10:00.000Z"
   }
 ]

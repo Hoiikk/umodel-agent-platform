@@ -13,35 +13,42 @@ from pathlib import Path
 
 MAX_STEPS = 5
 DEFAULT_GOAL = "比较 cand-004 和 cand-005，谁在招聘流程里更靠后？只根据查到的状态回答。"
-SPL_PATTERN = re.compile(
-    r"^\.entity_set with\(domain='rms', name='rms\.candidate', ids=\['([A-Za-z0-9_-]+)'\]\)$"
+_PREFIX = r"^\.entity_set with\(domain='rms', name='rms\.candidate', "
+_SPL_PATTERNS = (
+    re.compile(_PREFIX + r"ids=\['[A-Za-z0-9_-]+'\]\)$"),
+    re.compile(_PREFIX + r"status='(?:APPLIED|SCREENING|INTERVIEWING|HIRED|REJECTED)'\)$"),
+    re.compile(_PREFIX + "position='[\u4e00-\u9fffA-Za-z0-9]{1,32}'\\)$"),
+)
+_SPL_HELP = (
+    ".entity_set with(domain='rms', name='rms.candidate', ids=['cand-001'])；"
+    "或把 ids 换成 status='HIRED'、position='前端工程师'。一次只能填其中一种。"
 )
 TOOLS = [
     {
         "type": "function",
         "function": {
             "name": "query_umodel",
-            "description": "按一个候选人编号查询招聘记录。SPL 必须是规定格式。",
+            "description": "按一个编号、一个状态或一个职位查询招聘记录。SPL 必须是规定格式。",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "spl_query": {
-                        "type": "string",
-                        "description": ".entity_set with(domain='rms', name='rms.candidate', ids=['cand-001'])",
-                    }
-                },
+                "properties": {"spl_query": {"type": "string", "description": _SPL_HELP}},
                 "required": ["spl_query"],
             },
         },
     }
 ]
 SYSTEM = """你是招聘数据助手。只能通过 query_umodel 查数据。
-SPL 只能是：.entity_set with(domain='rms', name='rms.candidate', ids=['某个编号'])
-一次只能查一个编号，可以连续查多次。
+SPL 只能是下面三种之一，一次只能填一种：
+.entity_set with(domain='rms', name='rms.candidate', ids=['某个编号'])
+.entity_set with(domain='rms', name='rms.candidate', status='HIRED')
+.entity_set with(domain='rms', name='rms.candidate', position='前端工程师')
+status 只能是 APPLIED、SCREENING、INTERVIEWING、HIRED、REJECTED。
+用户给了编号就用 ids。没给编号、按状态或职位发问时，用 status 或 position。
 返回字段只有 candidate_id、name、phone、email、position、status、source、created_at。
-status 只有 APPLIED 已投递、SCREENING 筛选中、INTERVIEWING 面试中、HIRED 已录用、REJECTED 已淘汰。
+status 的含义是 APPLIED 已投递、SCREENING 筛选中、INTERVIEWING 面试中、HIRED 已录用、REJECTED 已淘汰。
 姓名、电话、邮箱已经打码。没有面试评价，也没有停留原因。
-ok 不是 true，或 data 为空，表示没查到。不要编造没有返回的人或数字。
+返回几行就写几行。ok 不是 true，或 data 为空，表示没查到。不要编造没有返回的人或数字。
+没有查询全部候选人的语句，不要把几次查询的行数相加当成总人数。
 前进顺序是已投递、筛选中、面试中、已录用。已淘汰不能和仍在流程中的人比先后。
 材料够了就直接写结论，不要再调用工具。"""
 
@@ -80,8 +87,8 @@ def load_local_env() -> None:
 
 def query_umodel(spl_query: str, execute: Query | None = None) -> str:
     spl = (spl_query or "").strip()
-    if SPL_PATTERN.match(spl) is None:
-        payload: dict = {"ok": False, "error": "只接受带一个 ids 的 rms.candidate 查询"}
+    if not any(pattern.match(spl) for pattern in _SPL_PATTERNS):
+        payload = {"ok": False, "error": "只接受 rms.candidate 的一个编号、一个状态或一个职位"}
     else:
         payload = (execute or _execute)(spl)
     return json.dumps(payload, ensure_ascii=False)

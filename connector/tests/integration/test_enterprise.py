@@ -73,6 +73,21 @@ def test_render_binds_order_id_and_rejects_injection() -> None:
         )
 
 
+def test_rms_status_filter_is_one_bound_parameter() -> None:
+    plan = _assistant({}).renderer.render_spl(
+        ".entity_set with(domain='rms', name='rms.candidate', status='HIRED')",
+        PRINCIPAL,
+    )
+    assert "HIRED" not in plan.sql
+    assert plan.params == ("HIRED",)
+    assert "`status` = %s" in plan.sql
+    with pytest.raises(Exception, match="filter must be one candidate status or one position"):
+        _assistant({}).renderer.render_spl(
+            ".entity_set with(domain='rms', name='rms.candidate', status='OFFER')",
+            PRINCIPAL,
+        )
+
+
 def test_rms_storage_endpoint_can_be_overridden_for_a_deployment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("RMS_MYSQL_ENDPOINT", "127.0.0.1:3308")
     plan = _assistant({}).renderer.render_spl(RMS_CANDIDATE, PRINCIPAL)

@@ -4,6 +4,7 @@ import os
 from data_agent.agent import TOOLS, apply_env_file, chat, query_umodel, run
 
 SPL = ".entity_set with(domain='rms', name='rms.candidate', ids=['cand-004'])"
+STATUS_SPL = ".entity_set with(domain='rms', name='rms.candidate', status='HIRED')"
 
 
 def test_env_file_does_not_override(tmp_path, monkeypatch):
@@ -19,8 +20,26 @@ def test_query_rejects_unsupported_spl_without_calling_storage():
     def fail(spl: str) -> dict:
         raise AssertionError(spl)
 
-    payload = json.loads(query_umodel(".entity_set with(domain='rms', name='rms.candidate') | count", fail))
-    assert payload == {"ok": False, "error": "只接受带一个 ids 的 rms.candidate 查询"}
+    samples = [
+        ".entity_set with(domain='rms', name='rms.candidate') | count",
+        ".entity_set with(domain='rms', name='rms.candidate', source='猎聘')",
+        ".entity_set with(domain='commerce', name='commerce.order', ids=['U-1001'])",
+    ]
+    for sample in samples:
+        payload = json.loads(query_umodel(sample, fail))
+        assert payload == {"ok": False, "error": "只接受 rms.candidate 的一个编号、一个状态或一个职位"}
+
+
+def test_status_query_calls_storage():
+    seen = []
+
+    def execute(spl: str) -> dict:
+        seen.append(spl)
+        return {"ok": True, "data": [{"candidate_id": "cand-005", "status": "HIRED"}]}
+
+    payload = json.loads(query_umodel(STATUS_SPL, execute))
+    assert seen == [STATUS_SPL]
+    assert payload["data"][0]["candidate_id"] == "cand-005"
 
 
 def test_query_calls_storage_for_one_id():

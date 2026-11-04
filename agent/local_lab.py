@@ -1,8 +1,8 @@
 """Stand-ins for UModel and MySQL when Docker is not running.
 
 Open-source UModel refuses a plain .entity_set read. This HTTP server returns that
-same refusal. The MySQL stand-in answers the one SELECT the connector then renders,
-using the RMS seed rows. Graph queries and any other SQL are rejected.
+same refusal. The MySQL stand-in answers the SELECT the connector then renders:
+one id, one status, or one position, using the RMS seed rows. Other SQL is rejected.
 """
 
 from __future__ import annotations
@@ -20,6 +20,8 @@ from mysql_mimic.errors import MysqlError
 from data_agent.agent import load_local_env
 
 _ID = re.compile(r"`id`\s*=\s*'([A-Za-z0-9_-]+)'")
+_STATUS = re.compile(r"`status`\s*=\s*'(APPLIED|SCREENING|INTERVIEWING|HIRED|REJECTED)'")
+_POSITION = re.compile("`position`\\s*=\\s*'([\u4e00-\u9fffA-Za-z0-9]{1,32})'")
 _COLUMNS = ("id", "name", "phone", "email", "position", "status", "source", "created_at")
 _ROWS = {
     "cand-001": (
@@ -45,6 +47,14 @@ _ROWS = {
     "cand-006": (
         "cand-006", "赵敏", "13800000006", "zhaomin@example.com",
         "产品经理", "REJECTED", "猎头推荐", "2026-09-01 08:50:00.000",
+    ),
+    "cand-007": (
+        "cand-007", "周宁", "13800000007", "zhouning@example.com",
+        "前端工程师", "HIRED", "猎聘", "2026-08-20 10:15:00.000",
+    ),
+    "cand-008": (
+        "cand-008", "吴婷", "13800000008", "wuting@example.com",
+        "后端工程师", "INTERVIEWING", "内推", "2026-09-15 09:10:00.000",
     ),
 }
 _REFUSAL = {
@@ -95,11 +105,20 @@ class _Reader(IdentityProvider):
 
 class _Candidates(Session):
     async def query(self, expression: object, sql: str, attrs: dict[str, str]) -> tuple[list[tuple], list[str]]:
-        found = _ID.search(sql or "")
-        if found is None or "candidates" not in sql:
-            raise MysqlError("local stand-in only serves one candidate lookup")
-        row = _ROWS.get(found.group(1))
-        return ([row] if row else []), list(_COLUMNS)
+        text = sql or ""
+        by_id = _ID.search(text)
+        by_status = _STATUS.search(text)
+        by_position = _POSITION.search(text)
+        found = [item for item in (by_id, by_status, by_position) if item]
+        if len(found) != 1 or "candidates" not in text:
+            raise MysqlError("local stand-in only serves one candidate lookup or one status/position filter")
+        if by_id:
+            row = _ROWS.get(by_id.group(1))
+            return ([row] if row else []), list(_COLUMNS)
+        picked = by_status or by_position
+        column = 5 if by_status else 4
+        assert picked is not None
+        return [row for row in _ROWS.values() if row[column] == picked.group(1)], list(_COLUMNS)
 
 
 def main() -> None:

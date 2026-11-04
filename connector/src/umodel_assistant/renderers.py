@@ -17,6 +17,9 @@ _DOMAIN = re.compile(r"domain\s*=\s*'([^']*)'", re.IGNORECASE)
 _NAME = re.compile(r"name\s*=\s*'([^']*)'", re.IGNORECASE)
 _IDS = re.compile(r"ids\s*=\s*\[([^\]]*)\]", re.IGNORECASE)
 _ID = re.compile(r"'([^']*)'")
+_FILTER = re.compile(r"(?:^|[\s,])(status|position)\s*=\s*'([^']*)'", re.IGNORECASE)
+_POSITION_VALUE = re.compile("^[\u4e00-\u9fffA-Za-z0-9]{1,32}$")
+_STATUSES = frozenset({"APPLIED", "SCREENING", "INTERVIEWING", "HIRED", "REJECTED"})
 _PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
 
 
@@ -34,16 +37,29 @@ class PlanRenderer:
         name = _first(_NAME, text, "name")
         found = _IDS.search(text)
         ids = _ID.findall(found.group(1)) if found else []
-        if not ids:
-            raise AssistantError("missing_ids", "entity_set live fetch needs ids=['...']")
-        return self.render_entity(domain, name, ids[0], principal)
+        filters = _FILTER.findall(text)
+        if ids and filters:
+            raise AssistantError("spl", "entity_set accepts ids or one field filter, not both")
+        if ids:
+            return self.render_entity(domain, name, ids[0], principal)
+        if len(filters) == 1:
+            column, value = filters[0]
+            self._check_filter(column.lower(), value)
+            return self.render_entity(domain, name, value, principal, lookup=column.lower())
+        if filters:
+            raise AssistantError("spl", "entity_set accepts one field filter")
+        raise AssistantError("missing_ids", "entity_set live fetch needs ids=['...']")
 
-    def render_entity(self, domain: str, name: str, entity_id: str, principal: Principal) -> FetchPlan:
+    def render_entity(
+        self, domain: str, name: str, entity_id: str, principal: Principal, lookup: str | None = None
+    ) -> FetchPlan:
         bound = self.pack.binding(domain, name)
         storage = bound["storage"]
         kind = str(storage.get("kind") or "")
+        if lookup is not None and kind != "mysql":
+            raise AssistantError("local_render", "field filters are only rendered for mysql entity sets")
         if kind == "mysql":
-            plan = self._mysql(bound, entity_id, principal)
+            plan = self._mysql(bound, entity_id, principal, lookup=lookup)
         elif kind == "external_storage":
             plan = self._http(bound, entity_id, principal)
         else:
@@ -56,7 +72,16 @@ class PlanRenderer:
         plan.name_map = {str(field): str(column) for field, column in mapping.items()}
         return plan
 
-    def _mysql(self, bound: dict[str, Any], entity_id: str, principal: Principal) -> FetchPlan:
+    def _check_filter(self, column: str, value: str) -> None:
+        if column == "status" and value in _STATUSES:
+            return
+        if column == "position" and _POSITION_VALUE.fullmatch(value):
+            return
+        raise AssistantError("spl", "filter must be one candidate status or one position")
+
+    def _mysql(
+        self, bound: dict[str, Any], entity_id: str, principal: Principal, lookup: str | None = None
+    ) -> FetchPlan:
         spec = bound["storage"]["spec"]
         mapping = bound["storage_link"]["spec"].get("fields_mapping") or {}
         columns: list[str] = []
@@ -68,13 +93,18 @@ class PlanRenderer:
                 columns.append(self.guard.quote_ident(text))
         if not columns:
             raise AssistantError("model_link", "storage_link fields_mapping is empty")
-        lookup = str(spec.get("lookup_field") or "")
-        if not lookup:
-            primary = (bound["entity"].get("spec") or {}).get("primary_key_fields") or []
-            if not primary:
-                raise AssistantError("model_link", "storage has no lookup_field and the entity set has no primary key")
-            lookup = str(mapping.get(primary[0]) or primary[0])
-        uid = self.guard.require_safe_id(entity_id)
+        if lookup is None:
+            lookup = str(spec.get("lookup_field") or "")
+            if not lookup:
+                primary = (bound["entity"].get("spec") or {}).get("primary_key_fields") or []
+                if not primary:
+                    raise AssistantError("model_link", "storage has no lookup_field and the entity set has no primary key")
+                lookup = str(mapping.get(primary[0]) or primary[0])
+            uid = self.guard.require_safe_id(entity_id)
+        elif lookup not in {str(column) for column in mapping.values()}:
+            raise AssistantError("model_link", f"storage does not map filter field {lookup}")
+        else:
+            uid = entity_id
         params: list[Any] = [uid]
         where = f"{self.guard.quote_ident(lookup)} = %s"
         tenant_field = spec.get("tenant_field")
