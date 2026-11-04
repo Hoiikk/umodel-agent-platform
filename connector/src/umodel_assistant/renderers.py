@@ -98,7 +98,10 @@ class PlanRenderer:
             if not lookup:
                 primary = (bound["entity"].get("spec") or {}).get("primary_key_fields") or []
                 if not primary:
-                    raise AssistantError("model_link", "storage has no lookup_field and the entity set has no primary key")
+                    raise AssistantError(
+                        "model_link",
+                        "storage has no lookup_field and the entity set has no primary key",
+                    )
                 lookup = str(mapping.get(primary[0]) or primary[0])
             uid = self.guard.require_safe_id(entity_id)
         elif lookup not in {str(column) for column in mapping.values()}:
