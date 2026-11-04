@@ -76,16 +76,14 @@ connector\.venv\Scripts\python -m data_agent 分别查询 cand-005 和 cand-007�
 
 ## 项 2. 按状态或职位查出一批人
 
-下一项做这个。触发条件：用户不报编号，就要「哪些人已录用」或「前端工程师都在什么阶段」。现在模型只能猜 `cand-001` 这种编号，猜出来的名单不能当结果。
+已完成。用户不报编号时，按一个状态或一个职位查。一次只能填一种，不能和编号拼在一起，也不能写成任意 WHERE。
 
-按这个顺序改：
+```
+.entity_set with(domain='rms', name='rms.candidate', status='HIRED')
+.entity_set with(domain='rms', name='rms.candidate', position='前端工程师')
+```
 
-1. 定一条只读查询，范围写死。例如按一个 `status`，或按一个 `position`，返回候选人编号和状态。不要做成任意 SQL，也不要一次接受模型和用户拼出来的 WHERE。
-2. 连接器渲染这条查询，参数仍然用占位符。模型文件继续放在 `connector/model/` 下现有的 `rms.candidate` 实体、事件、存储和 link 里；不够用再加字段，不新造一套存储。
-3. `agent/local_lab.py` 的 `_Candidates.query` 现在只接受带 `` `id` = '...' `` 的语句。新语句要在这里返回同样的种子行，其它语句继续拒绝。
-4. 放宽 `agent/src/data_agent/agent.py` 的 `SPL_PATTERN` 和工具说明，让这一种新 SPL 通过，其它形状仍然在进连接器之前拒绝。
-5. `SYSTEM` 写明：用户没给编号时用新查询；返回几行就写几行；空列表是没查到，不是零的另一种说法以外的编造。
-6. 测试：一条合法的状态查询会调用注入的 `execute`；计数、任意字段、第二个实体仍然被拒绝且不调用存储。
+`status` 只能是五种状态之一。返回几行就写几行。问「总共几个 cand」时仍然没有对应查询，不能把几次结果加总。
 
 验收：
 

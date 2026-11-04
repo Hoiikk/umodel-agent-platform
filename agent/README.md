@@ -1,6 +1,6 @@
 # Data Agent
 
-不使用 LangGraph。模型只决定查哪个候选人编号，以及最后怎么写结论。真正的查询交给 `connector`，一次一个编号，密码不进模型请求。后面数据变复杂时按 [`PROCESS.md`](PROCESS.md) 一项一项做。
+不使用 LangGraph。模型决定查一个编号、一个状态或一个职位，以及最后怎么写结论。真正的查询交给 `connector`，密码不进模型请求。后面数据变复杂时按 [`PROCESS.md`](PROCESS.md) 一项一项做。
 
 配置在 `agent/.env`。数据库只读密码留在 `rms/.env`，启动时如果 Agent 配置里没有这一项，会从那里读取。
 
