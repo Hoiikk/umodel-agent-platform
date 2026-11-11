@@ -9,7 +9,7 @@ spec:
   fields:
     - { name: opening_id, type: string }
     - { name: title, type: string }
-    - { name: headcount, type: long }
+    - { name: headcount, type: integer }
   primary_key_fields: [opening_id]
   id_generator: opening_id
   name_fields: [opening_id, title]

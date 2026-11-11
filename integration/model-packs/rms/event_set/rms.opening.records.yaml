@@ -8,7 +8,7 @@ spec:
   fields:
     - { name: opening_id, type: string }
     - { name: title, type: string }
-    - { name: headcount, type: long }
+    - { name: headcount, type: integer }
   name_fields: [opening_id, title]
   tag_fields: [title]
   ordered_fields: [opening_id, title, headcount]
