@@ -1,3 +1,8 @@
+## 2026-11-11 候选人增加淘汰原因
+- 完成：主表新增 `reject_reason` / `rejectReason`。种子里只有 cand-006 为「技能不匹配」，其余为 null。连接器模型、本机替身和 Agent 提示词同步能读到这一列
+- 变更文件：db/init/001_schema.sql、db/init/003_seed.sql、db/migrations/004_reject_reason.sql、packages/shared/src/candidate.ts、apps/backend/src/data/candidates.json、apps/backend/src/repositories/mysqlCandidateRepository.ts、apps/backend/tests/candidateRead.test.ts、AGENTS.md、PROGRESS.md
+- 遗留 / 风险：已经初始化过的 Docker MySQL 不会重跑 init，需要手工执行 `db/migrations/004_reject_reason.sql`。看板不展示这一列。Agent 侧的文档在仓库 `agent/PROCESS.md`
+
 ## 2026-09-23 重写 AI Coding 培训讲义
 - 完成：按本仓库真实 RMS（五态线性、8 字段、packages/shared、51 条单测）重写 ai_coding.html。17 张 cursor_screenshot 全部嵌入，点击可全屏、方向键翻页。同步了 Cursor 用法（Agent / Ask / Plan、@ 引用、Skill 靠 description 触发、AGENTS.md 每轮注入）以及国内可用模型的成本口径（DeepSeek、千问、Cursor 内的 Composer 与 Kimi；不含 Codex）。旧的四列 / 6 字段示例已替换为本仓库实录
 - 变更文件：ai_coding.html、PROGRESS.md

@@ -79,6 +79,7 @@ def test_rms_status_filter_is_one_bound_parameter() -> None:
         PRINCIPAL,
     )
     assert "HIRED" not in plan.sql
+    assert "`reject_reason`" in plan.sql
     assert plan.params == ("HIRED",)
     assert "`status` = %s" in plan.sql
     with pytest.raises(Exception, match="filter must be one candidate status or one position"):

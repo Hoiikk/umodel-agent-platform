@@ -34,6 +34,8 @@ export interface Candidate {
   status: CandidateStatus;
   /** 来源渠道 */
   source: string;
+  /** 淘汰原因；种子里没写就是 null */
+  rejectReason: string | null;
   /** 创建时间（ISO 8601） */
   createdAt: string;
 }

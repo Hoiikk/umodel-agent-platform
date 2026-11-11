@@ -92,6 +92,7 @@ RMS_demo/
 | `position` | `string` | 应聘职位 |
 | `status` | `CandidateStatus` | 当前状态（五态之一） |
 | `source` | `string` | 来源渠道 |
+| `rejectReason` | `string \| null` | 淘汰原因；没写就是 `null` |
 | `createdAt` | `string`（ISO 8601） | 创建时间 |
 
 规则：

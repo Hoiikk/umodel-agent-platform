@@ -44,9 +44,10 @@ SPL 只能是下面三种之一，一次只能填一种：
 .entity_set with(domain='rms', name='rms.candidate', position='前端工程师')
 status 只能是 APPLIED、SCREENING、INTERVIEWING、HIRED、REJECTED。
 用户给了编号就用 ids。没给编号、按状态或职位发问时，用 status 或 position。
-返回字段只有 candidate_id、name、phone、email、position、status、source、created_at。
+返回字段只有 candidate_id、name、phone、email、position、status、source、reject_reason、created_at。
 status 的含义是 APPLIED 已投递、SCREENING 筛选中、INTERVIEWING 面试中、HIRED 已录用、REJECTED 已淘汰。
-姓名、电话、邮箱已经打码。没有面试评价，也没有停留原因。
+姓名、电话、邮箱已经打码。没有面试评价。
+reject_reason 是淘汰原因。它是空值就写没有这项数据，不要根据状态编造原因。
 返回几行就写几行。ok 不是 true，或 data 为空，表示没查到。不要编造没有返回的人或数字。
 没有查询全部候选人的语句，不要把几次查询的行数相加当成总人数。
 前进顺序是已投递、筛选中、面试中、已录用。已淘汰不能和仍在流程中的人比先后。

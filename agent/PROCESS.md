@@ -40,7 +40,7 @@ connector\.venv\Scripts\python -m pytest agent
 | Docker 里的 MySQL（只在空库第一次初始化时执行） | `rms/db/init/003_seed.sql` |
 | RMS 页面和后端 | `rms/apps/backend/src/data/candidates.json` |
 
-`resumes.json` 只服务 RMS 的简历打分。Agent 不读它。新列或第二张表先不要加。
+`resumes.json` 只服务 RMS 的简历打分。Agent 不读它。再加列或第二张表，要等下一项的触发条件出现。
 
 ## 项 0. 按一个编号点查
 
@@ -48,13 +48,13 @@ connector\.venv\Scripts\python -m pytest agent
 
 能回答的问题：某个已知编号的状态、职位、来源、打码后的姓名电话邮箱。`cand-004` 和 `cand-008` 都是面试中，比先后应当并列。`cand-005` 和 `cand-007` 都是已录用。`cand-999` 应当说没查到。
 
-还不能回答、也不要靠提示词回答的问题：总共多少人、有哪些人已录用、为什么停在这一阶段。没有返回的数字不能写进结论。
+还不能回答、也不要靠提示词回答的问题：总共多少人。没有返回的数字不能写进结论。没有面试评价。淘汰原因只看 `reject_reason`，空值不能补写。
 
 相关代码：
 
-- `agent/src/data_agent/agent.py`：`SPL_PATTERN`、`TOOLS`、`SYSTEM`、`MAX_STEPS = 5`
-- `connector/src/umodel_assistant/renderers.py`：只渲染 `.entity_set`，并且只用 `ids` 里的第一个
-- `connector/model/entity_set/rms.candidate.yaml`：只有这 8 个字段
+- `agent/src/data_agent/agent.py`：`_SPL_PATTERNS`、`TOOLS`、`SYSTEM`、`MAX_STEPS = 5`
+- `connector/src/umodel_assistant/renderers.py`：只渲染 `.entity_set`
+- `connector/model/entity_set/rms.candidate.yaml`：含 `reject_reason`
 
 ## 项 1. 补对照用的种子
 
@@ -97,11 +97,17 @@ connector\.venv\Scripts\python -m data_agent 哪些候选人是已录用
 
 ## 项 3. 答案需要新字段
 
-触发条件：问题要的内容不在这 8 个字段里，例如面试评价、淘汰原因、部门。
+已完成。新增 `reject_reason`（淘汰原因）。只有 cand-006 写了「技能不匹配」，其余为空。这不是个人信息，不打码。面试评价和部门还没有。
 
-按这个顺序改：表结构 `rms/db/init/001_schema.sql`，RMS 共享类型 `rms/packages/shared`，模型 `connector/model/entity_set/rms.candidate.yaml` 和对应的 event、storage link，打码规则（姓名、电话、邮箱已经打码，新的个人信息同样打码），然后是三处种子和 `local_lab.py` 的列，最后才是 `SYSTEM` 里的字段清单。只改 SQL 或只改提示词，Agent 都看不到新字段。
+验收（替身开着）：
 
-验收用一个已知编号询问新字段。种子里没有写的原因，结论里就写没有这项数据。
+```sh
+connector\.venv\Scripts\python -m data_agent cand-006 的淘汰原因是什么
+connector\.venv\Scripts\python -m data_agent cand-004 的淘汰原因是什么
+connector\.venv\Scripts\python -m data_agent 查询 cand-999
+```
+
+第一条的结论是技能不匹配。第二条写没有这项数据。第三条写没查到。不要出现种子里没写过的评价。
 
 ## 项 4. 一轮里要合法地查很多次
 

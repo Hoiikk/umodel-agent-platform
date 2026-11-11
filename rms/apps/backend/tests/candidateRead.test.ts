@@ -9,7 +9,7 @@ import seed from '../src/data/candidates.json';
  * GET /api/candidates 读取契约测试（先于存储层性能优化落地）。
  *
  * 锁定三项契约，优化前后都必须保持：
- * 1. 字段：每条记录恰好含 AGENTS.md §3.2 冻结的 8 个字段，类型与取值不变；
+ * 1. 字段：每条记录恰好含 AGENTS.md §3.2 的 9 个字段，类型与取值不变；
  * 2. 条数：与种子文件 candidates.json 一致；
  * 3. 顺序：返回顺序与种子文件声明顺序一致。
  *
@@ -19,7 +19,7 @@ import seed from '../src/data/candidates.json';
  */
 
 /** AGENTS.md §3.2 冻结字段（字典序，供精确比对）。 */
-const FROZEN_FIELDS = ['createdAt', 'email', 'id', 'name', 'phone', 'position', 'source', 'status'];
+const FROZEN_FIELDS = ['createdAt', 'email', 'id', 'name', 'phone', 'position', 'rejectReason', 'source', 'status'];
 
 describe('GET /api/candidates - HTTP 读取契约', () => {
   let server: Server;
@@ -51,13 +51,17 @@ describe('GET /api/candidates - HTTP 读取契约', () => {
     expect(body).toHaveLength(seed.length);
   });
 
-  it('每条记录恰好包含 8 个冻结字段，类型正确、状态合法', async () => {
+  it('每条记录恰好包含 9 个字段，类型正确、状态合法', async () => {
     const res = await fetch(`${baseUrl}/api/candidates`);
     const body = (await res.json()) as Record<string, unknown>[];
     for (const item of body) {
       expect(Object.keys(item).sort()).toEqual(FROZEN_FIELDS);
       for (const field of FROZEN_FIELDS) {
-        expect(typeof item[field]).toBe('string');
+        if (field === 'rejectReason') {
+          expect(item[field] === null || typeof item[field] === 'string').toBe(true);
+        } else {
+          expect(typeof item[field]).toBe('string');
+        }
       }
       expect(isCandidateStatus(item.status)).toBe(true);
     }
