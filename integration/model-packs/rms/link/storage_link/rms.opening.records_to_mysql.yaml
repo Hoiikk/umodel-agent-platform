@@ -1,0 +1,7 @@
+kind: storage_link
+schema: { url: "umodel.aliyun.com", version: "v1.0.0" }
+metadata: { name: rms.opening.records_to_mysql, domain: rms }
+spec:
+  src: { domain: rms, kind: event_set, name: rms.opening.records }
+  dest: { domain: rms, kind: mysql, name: rms.opening.mysql }
+  fields_mapping: { opening_id: id, title: title, headcount: headcount }

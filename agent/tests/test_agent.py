@@ -5,6 +5,8 @@ from data_agent.agent import TOOLS, apply_env_file, chat, query_umodel, run
 
 SPL = ".entity_set with(domain='rms', name='rms.candidate', ids=['cand-004'])"
 STATUS_SPL = ".entity_set with(domain='rms', name='rms.candidate', status='HIRED')"
+OPENING_SPL = ".entity_set with(domain='rms', name='rms.opening', ids=['job-001'])"
+_REJECT = "只接受 rms.candidate 的一个编号、一个状态或一个职位，或 rms.opening 的一个编号"
 
 
 def test_env_file_does_not_override(tmp_path, monkeypatch):
@@ -24,10 +26,25 @@ def test_query_rejects_unsupported_spl_without_calling_storage():
         ".entity_set with(domain='rms', name='rms.candidate') | count",
         ".entity_set with(domain='rms', name='rms.candidate', source='猎聘')",
         ".entity_set with(domain='commerce', name='commerce.order', ids=['U-1001'])",
+        ".topo | limit 20",
     ]
     for sample in samples:
         payload = json.loads(query_umodel(sample, fail))
-        assert payload == {"ok": False, "error": "只接受 rms.candidate 的一个编号、一个状态或一个职位"}
+        assert payload == {"ok": False, "error": _REJECT}
+    opening_filter = ".entity_set with(domain='rms', name='rms.opening', title='前端工程师')"
+    assert json.loads(query_umodel(opening_filter, fail)) == {"ok": False, "error": _REJECT}
+
+
+def test_opening_query_calls_storage():
+    seen = []
+
+    def execute(spl: str) -> dict:
+        seen.append(spl)
+        return {"ok": True, "data": [{"opening_id": "job-001", "title": "前端工程师", "headcount": 2}]}
+
+    payload = json.loads(query_umodel(OPENING_SPL, execute))
+    assert seen == [OPENING_SPL]
+    assert payload["data"][0]["headcount"] == 2
 
 
 def test_status_query_calls_storage():
@@ -72,6 +89,33 @@ def test_loop_stops_when_the_model_answers():
     text = run("cand-004 现在什么状态", complete, lambda spl: seen.append(spl) or '{"ok": true, "data": []}')
     assert seen == [SPL]
     assert text == "cand-004 当前是面试中。"
+
+
+def test_several_lookups_in_one_turn_count_as_one_step():
+    calls = [
+        {
+            "id": str(i),
+            "function": {
+                "name": "query_umodel",
+                "arguments": json.dumps({"spl_query": SPL.replace("cand-004", f"cand-00{i}")}),
+            },
+        }
+        for i in range(1, 9)
+    ]
+    replies = [{"tool_calls": calls}, {"content": "八个人都查到了。"}]
+
+    def complete(messages, tools):
+        return replies.pop(0)
+
+    seen = []
+    text = run(
+        "分别告诉我 cand-001 到 cand-008 的状态",
+        complete,
+        lambda spl: seen.append(spl) or '{"ok": true, "data": []}',
+        max_steps=2,
+    )
+    assert len(seen) == 8
+    assert text == "八个人都查到了。"
 
 
 def test_unknown_tool_is_rejected_and_step_limit_stops():

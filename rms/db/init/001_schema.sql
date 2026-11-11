@@ -7,3 +7,8 @@ CREATE TABLE candidates (
   KEY idx_candidates_position_status_created_at (position, status, created_at),
   KEY idx_candidates_source_created_at (source, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE openings (
+  id VARCHAR(64) NOT NULL, title VARCHAR(128) NOT NULL, headcount INT NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

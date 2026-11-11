@@ -89,6 +89,17 @@ def test_rms_status_filter_is_one_bound_parameter() -> None:
         )
 
 
+def test_rms_opening_lookup_is_one_bound_parameter() -> None:
+    plan = _assistant({}).renderer.render_spl(
+        ".entity_set with(domain='rms', name='rms.opening', ids=['job-001'])",
+        PRINCIPAL,
+    )
+    assert "job-001" not in plan.sql
+    assert plan.params == ("job-001",)
+    assert "`openings`" in plan.sql
+    assert "`headcount`" in plan.sql
+
+
 def test_rms_storage_endpoint_can_be_overridden_for_a_deployment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("RMS_MYSQL_ENDPOINT", "127.0.0.1:3308")
     plan = _assistant({}).renderer.render_spl(RMS_CANDIDATE, PRINCIPAL)

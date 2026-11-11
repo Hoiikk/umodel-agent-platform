@@ -1,0 +1,8 @@
+kind: data_link
+schema: { url: "umodel.aliyun.com", version: "v1.0.0" }
+metadata: { name: rms.opening_related_to_rms.opening.records, domain: rms }
+spec:
+  src: { domain: rms, kind: entity_set, name: rms.opening }
+  dest: { domain: rms, kind: event_set, name: rms.opening.records }
+  fields_mapping: { opening_id: id, title: title, headcount: headcount }
+  data_link_type: related_to

@@ -1,0 +1,14 @@
+kind: event_set
+schema: { url: "umodel.aliyun.com", version: "v1.0.0" }
+metadata:
+  name: rms.opening.records
+  domain: rms
+  display_name: { en_us: Opening records, zh_cn: 职位编制记录 }
+spec:
+  fields:
+    - { name: opening_id, type: string }
+    - { name: title, type: string }
+    - { name: headcount, type: long }
+  name_fields: [opening_id, title]
+  tag_fields: [title]
+  ordered_fields: [opening_id, title, headcount]

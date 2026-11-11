@@ -1,0 +1,18 @@
+kind: mysql
+schema: { url: "umodel.aliyun.com", version: "v1.0.0" }
+metadata:
+  name: rms.opening.mysql
+  domain: rms
+  display_name: { en_us: RMS opening MySQL, zh_cn: RMS 职位编制 MySQL }
+spec:
+  endpoint: "127.0.0.1:3307"
+  endpoint_env: RMS_MYSQL_ENDPOINT
+  database: rms
+  table: openings
+  sql_dialect: mysql
+  default_limit: 100
+  max_limit: 500
+  read_only: true
+  lookup_field: id
+  username: umodel_reader
+  credential_ref: secret://RMS_READONLY_PASSWORD

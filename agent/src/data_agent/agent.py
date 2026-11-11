@@ -13,22 +13,27 @@ from pathlib import Path
 
 MAX_STEPS = 5
 DEFAULT_GOAL = "比较 cand-004 和 cand-005，谁在招聘流程里更靠后？只根据查到的状态回答。"
-_PREFIX = r"^\.entity_set with\(domain='rms', name='rms\.candidate', "
+_CANDIDATE = r"^\.entity_set with\(domain='rms', name='rms\.candidate', "
+_OPENING = r"^\.entity_set with\(domain='rms', name='rms\.opening', "
 _SPL_PATTERNS = (
-    re.compile(_PREFIX + r"ids=\['[A-Za-z0-9_-]+'\]\)$"),
-    re.compile(_PREFIX + r"status='(?:APPLIED|SCREENING|INTERVIEWING|HIRED|REJECTED)'\)$"),
-    re.compile(_PREFIX + "position='[\u4e00-\u9fffA-Za-z0-9]{1,32}'\\)$"),
+    re.compile(_CANDIDATE + r"ids=\['[A-Za-z0-9_-]+'\]\)$"),
+    re.compile(_CANDIDATE + r"status='(?:APPLIED|SCREENING|INTERVIEWING|HIRED|REJECTED)'\)$"),
+    re.compile(_CANDIDATE + "position='[\u4e00-\u9fffA-Za-z0-9]{1,32}'\\)$"),
+    re.compile(_OPENING + r"ids=\['[A-Za-z0-9_-]+'\]\)$"),
 )
 _SPL_HELP = (
     ".entity_set with(domain='rms', name='rms.candidate', ids=['cand-001'])；"
-    "或把 ids 换成 status='HIRED'、position='前端工程师'。一次只能填其中一种。"
+    "或把 ids 换成 status='HIRED'、position='前端工程师'；"
+    "编制用 .entity_set with(domain='rms', name='rms.opening', ids=['job-001'])。"
+    "一次只能填其中一种。"
 )
+_SPL_REJECT = "只接受 rms.candidate 的一个编号、一个状态或一个职位，或 rms.opening 的一个编号"
 TOOLS = [
     {
         "type": "function",
         "function": {
             "name": "query_umodel",
-            "description": "按一个编号、一个状态或一个职位查询招聘记录。SPL 必须是规定格式。",
+            "description": "按一个候选人编号、一个状态、一个职位，或一个编制编号查询。SPL 必须是规定格式。",
             "parameters": {
                 "type": "object",
                 "properties": {"spl_query": {"type": "string", "description": _SPL_HELP}},
@@ -38,17 +43,21 @@ TOOLS = [
     }
 ]
 SYSTEM = """你是招聘数据助手。只能通过 query_umodel 查数据。
-SPL 只能是下面三种之一，一次只能填一种：
+SPL 只能是下面四种之一，一次只能填一种：
 .entity_set with(domain='rms', name='rms.candidate', ids=['某个编号'])
 .entity_set with(domain='rms', name='rms.candidate', status='HIRED')
 .entity_set with(domain='rms', name='rms.candidate', position='前端工程师')
+.entity_set with(domain='rms', name='rms.opening', ids=['某个编制编号'])
 status 只能是 APPLIED、SCREENING、INTERVIEWING、HIRED、REJECTED。
-用户给了编号就用 ids。没给编号、按状态或职位发问时，用 status 或 position。
-返回字段只有 candidate_id、name、phone、email、position、status、source、reject_reason、created_at。
+候选人编号用 rms.candidate 的 ids。编制编号（job- 开头）用 rms.opening 的 ids。
+没给编号、按状态或职位问候选人时，用 status 或 position。
+候选人字段只有 candidate_id、name、phone、email、position、status、source、reject_reason、created_at。
+编制字段只有 opening_id、title、headcount。title 是职位名称，headcount 是编制人数。
 status 的含义是 APPLIED 已投递、SCREENING 筛选中、INTERVIEWING 面试中、HIRED 已录用、REJECTED 已淘汰。
 姓名、电话、邮箱已经打码。没有面试评价。
 reject_reason 是淘汰原因。它是空值就写没有这项数据，不要根据状态编造原因。
-返回几行就写几行。ok 不是 true，或 data 为空，表示没查到。不要编造没有返回的人或数字。
+返回几行就写几行。ok 不是 true，或 data 为空，表示没查到。不要编造没有返回的人、编制或数字。
+查不到编制就写没有这个编制，不要据此列出候选人。
 没有查询全部候选人的语句，不要把几次查询的行数相加当成总人数。
 前进顺序是已投递、筛选中、面试中、已录用。已淘汰不能和仍在流程中的人比先后。
 材料够了就直接写结论，不要再调用工具。"""
@@ -89,7 +98,7 @@ def load_local_env() -> None:
 def query_umodel(spl_query: str, execute: Query | None = None) -> str:
     spl = (spl_query or "").strip()
     if not any(pattern.match(spl) for pattern in _SPL_PATTERNS):
-        payload = {"ok": False, "error": "只接受 rms.candidate 的一个编号、一个状态或一个职位"}
+        payload = {"ok": False, "error": _SPL_REJECT}
     else:
         payload = (execute or _execute)(spl)
     return json.dumps(payload, ensure_ascii=False)

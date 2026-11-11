@@ -1,0 +1,16 @@
+kind: entity_set
+schema: { url: "umodel.aliyun.com", version: "v0.1.0" }
+metadata:
+  name: rms.opening
+  domain: rms
+  display_name: { en_us: Opening, zh_cn: 职位编制 }
+  description: { en_us: A job opening with a headcount., zh_cn: 一个带编制人数的职位。 }
+spec:
+  fields:
+    - { name: opening_id, type: string }
+    - { name: title, type: string }
+    - { name: headcount, type: long }
+  primary_key_fields: [opening_id]
+  id_generator: opening_id
+  name_fields: [opening_id, title]
+  ordered_fields: [opening_id, title, headcount]

@@ -1,6 +1,6 @@
 # Data Agent
 
-不使用 LangGraph。模型决定查一个编号、一个状态或一个职位，以及最后怎么写结论。真正的查询交给 `connector`，密码不进模型请求。后面数据变复杂时按 [`PROCESS.md`](PROCESS.md) 一项一项做。
+不使用 LangGraph。模型决定查一个候选人编号、一个状态、一个职位或一个编制编号，以及最后怎么写结论。真正的查询交给 `connector`，密码不进模型请求。后面数据变复杂时按 [`PROCESS.md`](PROCESS.md) 一项一项做。
 
 配置在 `agent/.env`。数据库只读密码留在 `rms/.env`，启动时如果 Agent 配置里没有这一项，会从那里读取。
 
@@ -19,7 +19,7 @@ Windows 把 `bin` 换成 `Scripts`。这组测试不访问模型网关，也不�
 
 ## 没有 Docker 时
 
-这条招聘查询在开源 UModel 里会被拒绝执行，连接器再按模型生成 SQL。`local_lab.py` 用同样的拒绝，加上种子里的候选人，代替 Docker 里的 UModel 和 MySQL。图查询不会经过这个替身。
+这条招聘查询在开源 UModel 里会被拒绝执行，连接器再按模型生成 SQL。`local_lab.py` 用同样的拒绝，加上种子里的候选人和编制，代替 Docker 里的 UModel 和 MySQL。图查询不会经过这个替身。
 
 先装一次协议库，再开着这个窗口：
 

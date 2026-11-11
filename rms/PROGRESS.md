@@ -1,3 +1,8 @@
+## 2026-11-11 职位编制表
+- 完成：新增 `openings` 表，供连接器按编号读取编制。种子 4 行：job-001 前端工程师 2、job-002 后端工程师 1、job-003 测试工程师 1、job-004 产品经理 1。候选人主表和看板没有改
+- 变更文件：db/init/001_schema.sql、db/init/004_openings.sql、db/migrations/005_openings.sql、PROGRESS.md
+- 遗留 / 风险：已经初始化过的 Docker MySQL 不会重跑 init，需要手工执行 `db/migrations/005_openings.sql`。本机验收走 `agent/local_lab.py`，不依赖这张 Docker 表
+
 ## 2026-11-11 候选人增加淘汰原因
 - 完成：主表新增 `reject_reason` / `rejectReason`。种子里只有 cand-006 为「技能不匹配」，其余为 null。连接器模型、本机替身和 Agent 提示词同步能读到这一列
 - 变更文件：db/init/001_schema.sql、db/init/003_seed.sql、db/migrations/004_reject_reason.sql、packages/shared/src/candidate.ts、apps/backend/src/data/candidates.json、apps/backend/src/repositories/mysqlCandidateRepository.ts、apps/backend/tests/candidateRead.test.ts、AGENTS.md、PROGRESS.md

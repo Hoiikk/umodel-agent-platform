@@ -2,7 +2,7 @@
 
 Open-source UModel refuses a plain .entity_set read. This HTTP server returns that
 same refusal. The MySQL stand-in answers the SELECT the connector then renders:
-one id, one status, or one position, using the RMS seed rows. Other SQL is rejected.
+one candidate id, one status, one position, or one opening id. Other SQL is rejected.
 """
 
 from __future__ import annotations
@@ -23,6 +23,13 @@ _ID = re.compile(r"`id`\s*=\s*'([A-Za-z0-9_-]+)'")
 _STATUS = re.compile(r"`status`\s*=\s*'(APPLIED|SCREENING|INTERVIEWING|HIRED|REJECTED)'")
 _POSITION = re.compile("`position`\\s*=\\s*'([\u4e00-\u9fffA-Za-z0-9]{1,32})'")
 _COLUMNS = ("id", "name", "phone", "email", "position", "status", "source", "reject_reason", "created_at")
+_OPENING_COLUMNS = ("id", "title", "headcount")
+_OPENINGS = {
+    "job-001": ("job-001", "前端工程师", 2),
+    "job-002": ("job-002", "后端工程师", 1),
+    "job-003": ("job-003", "测试工程师", 1),
+    "job-004": ("job-004", "产品经理", 1),
+}
 _ROWS = {
     "cand-001": (
         "cand-001", "张伟", "13800000001", "zhangwei@example.com",
@@ -109,8 +116,13 @@ class _Candidates(Session):
         by_id = _ID.search(text)
         by_status = _STATUS.search(text)
         by_position = _POSITION.search(text)
+        if "`openings`" in text:
+            if by_id is None or by_status or by_position or "`candidates`" in text:
+                raise MysqlError("local stand-in only serves one opening id")
+            row = _OPENINGS.get(by_id.group(1))
+            return ([row] if row else []), list(_OPENING_COLUMNS)
         found = [item for item in (by_id, by_status, by_position) if item]
-        if len(found) != 1 or "candidates" not in text:
+        if len(found) != 1 or "`candidates`" not in text:
             raise MysqlError("local stand-in only serves one candidate lookup or one status/position filter")
         if by_id:
             row = _ROWS.get(by_id.group(1))
