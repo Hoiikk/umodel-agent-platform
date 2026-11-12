@@ -90,6 +90,7 @@ RMS_demo/
 | `phone` | `string` | 电话 |
 | `email` | `string` | 邮箱 |
 | `position` | `string` | 应聘职位 |
+| `openingId` | `string` | 所属编制编号，对应 `openings.id` |
 | `status` | `CandidateStatus` | 当前状态（五态之一） |
 | `source` | `string` | 来源渠道 |
 | `rejectReason` | `string \| null` | 淘汰原因；没写就是 `null` |

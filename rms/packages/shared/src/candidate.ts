@@ -30,6 +30,8 @@ export interface Candidate {
   email: string;
   /** 应聘职位 */
   position: string;
+  /** 所属编制编号，对应 openings.id */
+  openingId: string;
   /** 当前状态（五态之一） */
   status: CandidateStatus;
   /** 来源渠道 */

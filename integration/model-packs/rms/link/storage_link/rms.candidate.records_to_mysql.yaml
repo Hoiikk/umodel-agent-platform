@@ -4,4 +4,4 @@ metadata: { name: rms.candidate.records_to_mysql, domain: rms }
 spec:
   src: { domain: rms, kind: event_set, name: rms.candidate.records }
   dest: { domain: rms, kind: mysql, name: rms.candidate.mysql }
-  fields_mapping: { candidate_id: id, name: name, phone: phone, email: email, position: position, status: status, source: source, reject_reason: reject_reason, created_at: created_at }
+  fields_mapping: { candidate_id: id, name: name, phone: phone, email: email, position: position, status: status, source: source, reject_reason: reject_reason, opening_id: opening_id, created_at: created_at }

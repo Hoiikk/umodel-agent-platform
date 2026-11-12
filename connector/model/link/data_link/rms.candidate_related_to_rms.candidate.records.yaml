@@ -4,5 +4,5 @@ metadata: { name: rms.candidate_related_to_rms.candidate.records, domain: rms }
 spec:
   src: { domain: rms, kind: entity_set, name: rms.candidate }
   dest: { domain: rms, kind: event_set, name: rms.candidate.records }
-  fields_mapping: { candidate_id: id, name: name, phone: phone, email: email, position: position, status: status, source: source, reject_reason: reject_reason, created_at: created_at }
+  fields_mapping: { candidate_id: id, name: name, phone: phone, email: email, position: position, status: status, source: source, reject_reason: reject_reason, opening_id: opening_id, created_at: created_at }
   data_link_type: related_to

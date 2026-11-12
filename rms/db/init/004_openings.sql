@@ -4,3 +4,7 @@ INSERT INTO openings (id, title, headcount) VALUES
 ('job-002', '后端工程师', 1),
 ('job-003', '测试工程师', 1),
 ('job-004', '产品经理', 1);
+
+ALTER TABLE candidates
+  ADD CONSTRAINT fk_candidates_opening
+  FOREIGN KEY (opening_id) REFERENCES openings (id);

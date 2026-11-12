@@ -15,6 +15,7 @@ spec:
     - { name: status, type: string }
     - { name: source, type: string }
     - { name: reject_reason, type: string }
+    - { name: opening_id, type: string }
     - { name: created_at, type: time }
   primary_key_fields: [candidate_id]
   id_generator: candidate_id

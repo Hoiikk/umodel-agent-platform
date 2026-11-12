@@ -17,7 +17,7 @@ _DOMAIN = re.compile(r"domain\s*=\s*'([^']*)'", re.IGNORECASE)
 _NAME = re.compile(r"name\s*=\s*'([^']*)'", re.IGNORECASE)
 _IDS = re.compile(r"ids\s*=\s*\[([^\]]*)\]", re.IGNORECASE)
 _ID = re.compile(r"'([^']*)'")
-_FILTER = re.compile(r"(?:^|[\s,])(status|position)\s*=\s*'([^']*)'", re.IGNORECASE)
+_FILTER = re.compile(r"(?:^|[\s,])(status|position|opening_id)\s*=\s*'([^']*)'", re.IGNORECASE)
 _POSITION_VALUE = re.compile("^[\u4e00-\u9fffA-Za-z0-9]{1,32}$")
 _STATUSES = frozenset({"APPLIED", "SCREENING", "INTERVIEWING", "HIRED", "REJECTED"})
 _PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
@@ -76,6 +76,9 @@ class PlanRenderer:
         if column == "status" and value in _STATUSES:
             return
         if column == "position" and _POSITION_VALUE.fullmatch(value):
+            return
+        if column == "opening_id":
+            self.guard.require_safe_id(value)
             return
         raise AssistantError("spl", "filter must be one candidate status or one position")
 

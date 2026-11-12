@@ -80,6 +80,7 @@ def test_rms_status_filter_is_one_bound_parameter() -> None:
     )
     assert "HIRED" not in plan.sql
     assert "`reject_reason`" in plan.sql
+    assert "`opening_id`" in plan.sql
     assert plan.params == ("HIRED",)
     assert "`status` = %s" in plan.sql
     with pytest.raises(Exception, match="filter must be one candidate status or one position"):
@@ -87,6 +88,17 @@ def test_rms_status_filter_is_one_bound_parameter() -> None:
             ".entity_set with(domain='rms', name='rms.candidate', status='OFFER')",
             PRINCIPAL,
         )
+
+
+def test_rms_opening_id_filter_is_one_bound_parameter() -> None:
+    plan = _assistant({}).renderer.render_spl(
+        ".entity_set with(domain='rms', name='rms.candidate', opening_id='job-001')",
+        PRINCIPAL,
+    )
+    assert "job-001" not in plan.sql
+    assert plan.params == ("job-001",)
+    assert "`candidates`" in plan.sql
+    assert "`opening_id` = %s" in plan.sql
 
 
 def test_rms_opening_lookup_is_one_bound_parameter() -> None:

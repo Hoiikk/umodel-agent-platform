@@ -2,7 +2,7 @@
 
 Open-source UModel refuses a plain .entity_set read. This HTTP server returns that
 same refusal. The MySQL stand-in answers the SELECT the connector then renders:
-one candidate id, one status, one position, or one opening id. Other SQL is rejected.
+one candidate id, one status, one position, one opening_id, or one opening id. Other SQL is rejected.
 """
 
 from __future__ import annotations
@@ -22,7 +22,8 @@ from data_agent.agent import load_local_env
 _ID = re.compile(r"`id`\s*=\s*'([A-Za-z0-9_-]+)'")
 _STATUS = re.compile(r"`status`\s*=\s*'(APPLIED|SCREENING|INTERVIEWING|HIRED|REJECTED)'")
 _POSITION = re.compile("`position`\\s*=\\s*'([\u4e00-\u9fffA-Za-z0-9]{1,32})'")
-_COLUMNS = ("id", "name", "phone", "email", "position", "status", "source", "reject_reason", "created_at")
+_OPENING_ID = re.compile(r"`opening_id`\s*=\s*'([A-Za-z0-9_-]+)'")
+_COLUMNS = ("id", "name", "phone", "email", "position", "status", "source", "reject_reason", "created_at", "opening_id")
 _OPENING_COLUMNS = ("id", "title", "headcount")
 _OPENINGS = {
     "job-001": ("job-001", "前端工程师", 2),
@@ -33,35 +34,35 @@ _OPENINGS = {
 _ROWS = {
     "cand-001": (
         "cand-001", "张伟", "13800000001", "zhangwei@example.com",
-        "前端工程师", "APPLIED", "BOSS直聘", None, "2026-09-10 09:30:00.000",
+        "前端工程师", "APPLIED", "BOSS直聘", None, "2026-09-10 09:30:00.000", "job-001",
     ),
     "cand-002": (
         "cand-002", "李娜", "13800000002", "lina@example.com",
-        "后端工程师", "APPLIED", "官网投递", None, "2026-09-12 14:05:00.000",
+        "后端工程师", "APPLIED", "官网投递", None, "2026-09-12 14:05:00.000", "job-002",
     ),
     "cand-003": (
         "cand-003", "王强", "13800000003", "wangqiang@example.com",
-        "测试工程师", "SCREENING", "拉勾网", None, "2026-09-08 10:20:00.000",
+        "测试工程师", "SCREENING", "拉勾网", None, "2026-09-08 10:20:00.000", "job-003",
     ),
     "cand-004": (
         "cand-004", "陈静", "13800000004", "chenjing@example.com",
-        "前端工程师", "INTERVIEWING", "内推", None, "2026-09-05 16:45:00.000",
+        "前端工程师", "INTERVIEWING", "内推", None, "2026-09-05 16:45:00.000", "job-001",
     ),
     "cand-005": (
         "cand-005", "刘洋", "13800000005", "liuyang@example.com",
-        "后端工程师", "HIRED", "猎聘", None, "2026-08-28 11:00:00.000",
+        "后端工程师", "HIRED", "猎聘", None, "2026-08-28 11:00:00.000", "job-002",
     ),
     "cand-006": (
         "cand-006", "赵敏", "13800000006", "zhaomin@example.com",
-        "产品经理", "REJECTED", "猎头推荐", "技能不匹配", "2026-09-01 08:50:00.000",
+        "产品经理", "REJECTED", "猎头推荐", "技能不匹配", "2026-09-01 08:50:00.000", "job-004",
     ),
     "cand-007": (
         "cand-007", "周宁", "13800000007", "zhouning@example.com",
-        "前端工程师", "HIRED", "猎聘", None, "2026-08-20 10:15:00.000",
+        "前端工程师", "HIRED", "猎聘", None, "2026-08-20 10:15:00.000", "job-001",
     ),
     "cand-008": (
         "cand-008", "吴婷", "13800000008", "wuting@example.com",
-        "后端工程师", "INTERVIEWING", "内推", None, "2026-09-15 09:10:00.000",
+        "后端工程师", "INTERVIEWING", "内推", None, "2026-09-15 09:10:00.000", "job-002",
     ),
 }
 _REFUSAL = {
@@ -116,17 +117,20 @@ class _Candidates(Session):
         by_id = _ID.search(text)
         by_status = _STATUS.search(text)
         by_position = _POSITION.search(text)
+        by_opening = _OPENING_ID.search(text)
         if "`openings`" in text:
-            if by_id is None or by_status or by_position or "`candidates`" in text:
+            if by_id is None or by_status or by_position or by_opening or "`candidates`" in text:
                 raise MysqlError("local stand-in only serves one opening id")
             row = _OPENINGS.get(by_id.group(1))
             return ([row] if row else []), list(_OPENING_COLUMNS)
-        found = [item for item in (by_id, by_status, by_position) if item]
+        found = [item for item in (by_id, by_status, by_position, by_opening) if item]
         if len(found) != 1 or "`candidates`" not in text:
-            raise MysqlError("local stand-in only serves one candidate lookup or one status/position filter")
+            raise MysqlError("local stand-in only serves one candidate lookup or one field filter")
         if by_id:
             row = _ROWS.get(by_id.group(1))
             return ([row] if row else []), list(_COLUMNS)
+        if by_opening:
+            return [row for row in _ROWS.values() if row[9] == by_opening.group(1)], list(_COLUMNS)
         picked = by_status or by_position
         column = 5 if by_status else 4
         assert picked is not None

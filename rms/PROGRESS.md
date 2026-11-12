@@ -1,3 +1,8 @@
+## 2026-11-12 候选人所属编制
+- 完成：候选人主表新增 `opening_id` / `openingId`，外键指向 `openings.id`。种子按职位对上：前端 job-001，后端 job-002，测试 job-003，产品 job-004。看板不展示这一列
+- 变更文件：db/init/001_schema.sql、db/init/003_seed.sql、db/init/004_openings.sql、db/migrations/006_candidate_opening_id.sql、packages/shared/src/candidate.ts、apps/backend/src/data/candidates.json、apps/backend/src/repositories/mysqlCandidateRepository.ts、apps/backend/tests/candidateRead.test.ts、AGENTS.md、PROGRESS.md
+- 遗留 / 风险：已经初始化过的 Docker MySQL 要先有编制表，再手工执行 `db/migrations/006_candidate_opening_id.sql`。本机验收走 `agent/local_lab.py`
+
 ## 2026-11-11 职位编制表
 - 完成：新增 `openings` 表，供连接器按编号读取编制。种子 4 行：job-001 前端工程师 2、job-002 后端工程师 1、job-003 测试工程师 1、job-004 产品经理 1。候选人主表和看板没有改
 - 变更文件：db/init/001_schema.sql、db/init/004_openings.sql、db/migrations/005_openings.sql、PROGRESS.md
