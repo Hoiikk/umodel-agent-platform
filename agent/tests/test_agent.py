@@ -1,6 +1,7 @@
 import json
 import os
 
+from data_agent.__main__ import parse_args
 from data_agent.agent import TOOLS, apply_env_file, chat, query_umodel, run
 
 SPL = ".entity_set with(domain='rms', name='rms.candidate', ids=['cand-004'])"
@@ -534,3 +535,20 @@ def test_chat_posts_openai_payload(monkeypatch):
     assert captured["body"]["stream"] is False
     assert captured["auth"] == "Bearer secret"
     assert message["content"] == "ok"
+
+
+def test_loop_flag_defaults_to_run_and_can_select_graph():
+    loop, goal = parse_args(["cand-007 还要招几个人"])
+    assert loop == "run"
+    assert goal == "cand-007 还要招几个人"
+    loop, goal = parse_args(["--loop", "graph", "cand-007"])
+    assert (loop, goal) == ("graph", "cand-007")
+
+
+def test_unknown_loop_is_rejected():
+    try:
+        parse_args(["--loop", "langgraph"])
+    except SystemExit as exc:
+        assert "run|graph" in str(exc)
+    else:
+        raise AssertionError("expected SystemExit")

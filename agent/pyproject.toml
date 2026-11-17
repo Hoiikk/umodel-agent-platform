@@ -5,9 +5,9 @@ build-backend = "hatchling.build"
 [project]
 name = "data-agent"
 version = "0.1.0"
-description = "Framework-free data agent that reads RMS only through the UModel connector"
+description = "Recruitment data agent that reads RMS only through the UModel connector. Default loop is plain Python; --loop graph uses LangGraph."
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["langgraph>=1.0,<2"]
 
 [project.scripts]
 data-agent = "data_agent.__main__:main"

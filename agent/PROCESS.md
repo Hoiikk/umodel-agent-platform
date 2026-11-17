@@ -8,13 +8,16 @@
 connector\.venv\Scripts\python agent\local_lab.py
 ```
 
-另一个窗口：
+另一个窗口。默认走 `run`。`--loop` 放在问题前面，只能是 `run` 或 `graph`：
 
 ```sh
 connector\.venv\Scripts\python -m data_agent 这里写验收问题
+connector\.venv\Scripts\python -m data_agent --loop graph 这里写验收问题
 ```
 
-单元测试不访问模型，也不访问数据库：
+`graph` 在 `agent/src/data_agent/graph.py`。它和 `run` 用同一个 `pending_note`：点名的编号、编制下的职位、编制人数、还剩名额。缺了同样打印 `[检查]`，最多 5 轮。新的检查只改 `pending_note`，不要在 `graph.py` 里再写一套。查询语句的执行现在两处各有一段，改其中一处时另一处要一起改。
+
+单元测试不访问模型，也不访问数据库。`tests/test_graph.py` 用假的模型走图：
 
 ```sh
 connector\.venv\Scripts\python -m pytest agent
@@ -52,7 +55,8 @@ connector\.venv\Scripts\python -m pytest agent
 
 相关代码：
 
-- `agent/src/data_agent/agent.py`：`_SPL_PATTERNS`、`TOOLS`、`SYSTEM`、`MAX_STEPS = 5`
+- `agent/src/data_agent/agent.py`：`_SPL_PATTERNS`、`TOOLS`、`SYSTEM`、`pending_note`、`MAX_STEPS = 5`。`run` 是默认循环
+- `agent/src/data_agent/graph.py`：`--loop graph`。检查调用同一个 `pending_note`
 - `connector/src/umodel_assistant/renderers.py`：只渲染 `.entity_set`
 - `connector/model/entity_set/rms.candidate.yaml`：含 `reject_reason`
 
@@ -256,4 +260,4 @@ connector\.venv\Scripts\python -m data_agent cand-007 这个人的编制还要�
 - 不因为提示词写得更细，就让模型列出它没查过的编号。
 - 不把数据库密码、连接串放进工具参数或模型请求。
 - 不在 `agent.py` 里拼接 SQL。
-- 用户没提出新的问法之前，不加框架。当前循环是 `run`：模型返回工具调用就执行。返回文字时，问题里点名的编号都查过了才结束；问编制下有哪些候选人时，还要用查到的职位再查一次；问编制人数时，还要用查到的编制编号再查一次；问还剩几个名额时，还要用这个编号再列出该编制下的候选人。没做完就把缺的编号或职位放回对话再查。这个循环表达不了的步骤（要人中途确认、做到一半持久化再恢复）出现之后，再单独立项，不提前换 LangGraph。
+- 不把 `--loop graph` 当成新的查询能力。它只是把 `run` 的循环画成三个节点。要人中途确认，或做到一半存下来再恢复，这两件事现在的图和 `run` 都没有。出现之后再单独立项。不因为换了 LangGraph 就提高 `MAX_STEPS`，或放宽五种 SPL。

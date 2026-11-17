@@ -7,7 +7,7 @@
 - `rms/` — 招聘管理系统及其 MySQL 结构。
 - `connector/` — 按模型取数的只读执行层和 MCP 服务。
 - `integration/` — Compose 环境、语义模型包、冒烟测试和本地 CI。
-- `agent/` — 不依赖 Agent 框架的招聘数据助手。它只通过连接器按编号查询。
+- `agent/` — 招聘数据助手。按候选人编号、状态、职位或编制编号，经连接器只读查询。说明见 [`agent/README.md`](agent/README.md)。
 - `third_party/UnifiedModel` — 钉住版本的上游 UModel Git 子模块。产品代码不要改这里。
 
 ## 本地启动

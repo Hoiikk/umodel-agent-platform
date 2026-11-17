@@ -1,4 +1,4 @@
-"""ReAct loop over one read-only UModel tool. No agent framework."""
+"""Recruitment data agent. One read-only UModel tool, as a plain loop or the same loop on LangGraph."""
 
 from __future__ import annotations
 
@@ -357,6 +357,23 @@ def _queried_ids(messages: list[dict]) -> set[str]:
     return found
 
 
+def pending_note(goal: str, messages: list[dict]) -> str:
+    missing = [item for item in _named_ids(goal) if item not in _queried_ids(messages)]
+    if missing:
+        return "还没查全，缺 " + "、".join(missing) + "。先调用 query_umodel 查这些编号，再写结论。"
+    titles = _missing_followup_titles(goal, messages)
+    if titles:
+        quoted = "、".join(f"「{title}」" for title in titles)
+        return "还要用编制返回的职位" + quoted + "按 position 再查一次候选人。"
+    openings = _missing_opening_followups(goal, messages)
+    if openings:
+        return "还要用候选人返回的编制编号 " + "、".join(openings) + " 再查一次编制。"
+    seats = _missing_seat_followups(goal, messages)
+    if seats:
+        return "还要用编制编号 " + "、".join(seats) + " 按 opening_id 再查一次这个编制下的候选人。"
+    return ""
+
+
 def run(goal: str, complete_fn: Complete, query_fn: Query, max_steps: int = MAX_STEPS) -> str:
     messages: list[dict] = [
         {"role": "system", "content": SYSTEM},
@@ -366,28 +383,8 @@ def run(goal: str, complete_fn: Complete, query_fn: Query, max_steps: int = MAX_
         message = complete_fn(messages, TOOLS)
         calls = _tool_calls(message)
         if not calls:
-            missing = [item for item in _named_ids(goal) if item not in _queried_ids(messages)]
-            if missing:
-                note = "还没查全，缺 " + "、".join(missing) + "。先调用 query_umodel 查这些编号，再写结论。"
-                print("[检查] " + note, file=sys.stderr)
-                messages.append({"role": "user", "content": note})
-                continue
-            titles = _missing_followup_titles(goal, messages)
-            if titles:
-                quoted = "、".join(f"「{title}」" for title in titles)
-                note = "还要用编制返回的职位" + quoted + "按 position 再查一次候选人。"
-                print("[检查] " + note, file=sys.stderr)
-                messages.append({"role": "user", "content": note})
-                continue
-            openings = _missing_opening_followups(goal, messages)
-            if openings:
-                note = "还要用候选人返回的编制编号 " + "、".join(openings) + " 再查一次编制。"
-                print("[检查] " + note, file=sys.stderr)
-                messages.append({"role": "user", "content": note})
-                continue
-            seats = _missing_seat_followups(goal, messages)
-            if seats:
-                note = "还要用编制编号 " + "、".join(seats) + " 按 opening_id 再查一次这个编制下的候选人。"
+            note = pending_note(goal, messages)
+            if note:
                 print("[检查] " + note, file=sys.stderr)
                 messages.append({"role": "user", "content": note})
                 continue
@@ -448,7 +445,7 @@ def require_runtime_env() -> None:
         raise SystemExit("UMODEL_WORKSPACE 必须是 rms")
 
 
-def live(goal: str) -> str:
+def live(goal: str, loop: str = "run") -> str:
     base_url = os.environ["OPENAI_BASE_URL"]
     api_key = os.environ["OPENAI_API_KEY"]
     model = os.environ.get("DATA_AGENT_MODEL") or "qwen3.8-flash"
@@ -466,4 +463,10 @@ def live(goal: str) -> str:
         print(f"[结果] {text}", file=sys.stderr)
         return text
 
-    return run(goal, complete_fn, query_fn)
+    if loop == "run":
+        return run(goal, complete_fn, query_fn)
+    if loop == "graph":
+        from data_agent.graph import graph_run
+
+        return graph_run(goal, complete_fn, query_fn)
+    raise SystemExit("loop 只能是 run 或 graph")
