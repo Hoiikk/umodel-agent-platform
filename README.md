@@ -8,11 +8,13 @@
 - `connector/` — 按模型取数的只读执行层和 MCP 服务。
 - `integration/` — Compose 环境、语义模型包、冒烟测试和本地 CI。
 - `agent/` — 招聘数据助手。按候选人编号、状态、职位或编制编号，经连接器只读查询。说明见 [`agent/README.md`](agent/README.md)。
-- `third_party/UnifiedModel` — 钉住版本的上游 UModel Git 子模块。产品代码不要改这里。
+- `third_party/UnifiedModel` — 钉住版本的上游 UModel。压缩包不含此目录，按下面的命令从 GitHub 下载。产品代码不要改这里。
 
 ## 本地启动
 
 ```sh
+git clone https://github.com/alibaba/UnifiedModel.git third_party/UnifiedModel
+git -C third_party/UnifiedModel checkout 062377a6dbc394ec0af34dc10680d108b76d2201
 cp rms/.env.example rms/.env
 docker compose --env-file rms/.env -f integration/compose.yaml up --build
 integration/scripts/run-smoke.sh

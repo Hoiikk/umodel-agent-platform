@@ -35,42 +35,43 @@
 
 ## 配置
 
-复制 `agent/.env.example` 为 `agent/.env`，填上模型网关地址和密钥。可选模型是 `qwen3.8-flash`、`deepseek-v4.1-flash`、`deepseek-v4-flash-0731`、`deepseek-v4-pro-0813`，用 `DATA_AGENT_MODEL` 切换。
+在仓库根目录把两份 example 复制成真正的配置，再改内容。`agent/.env` 里把 `OPENAI_API_KEY` 换成模型网关密钥。可选模型是 `qwen3.8-flash`、`deepseek-v4.1-flash`、`deepseek-v4-flash-0731`、`deepseek-v4-pro-0813`，用 `DATA_AGENT_MODEL` 切换。
 
-数据库只读密码放在 `rms/.env`。Agent 配置里没有 `RMS_READONLY_PASSWORD` 时，启动时从那里读取。
+`rms/.env` 里的本地密码可以保持 example 的值。数据库只读密码放在这里。`agent/.env` 没有 `RMS_READONLY_PASSWORD` 时，启动时从 `rms/.env` 读取。`rms/.env` 的 `MYSQL_PORT=3307` 只给 `rms/compose.yaml` 用。这次的栈把 MySQL 固定在 `127.0.0.1:3308`，UModel 在 `127.0.0.1:8080`，不要靠改 `MYSQL_PORT` 换端口。
 
 ## 运行
 
-在仓库根目录执行。标准错误打印每一轮查询和返回，标准输出是结论。不带问题时，比较 cand-004 和 cand-005 谁在招聘流程里更靠后。
+下面的命令都在仓库根目录执行。标准错误打印每一轮查询和返回，标准输出是结论。不带问题时，比较 cand-004 和 cand-005 谁在招聘流程里更靠后。`--loop` 必须放在问题前面。
 
-没有 Docker 时，先开一个窗口跑本地替身。它复现开源 UModel 对 `.entity_set` 的拒绝，连接器再按模型生成 SQL，替身用种子数据回答。图查询不经过这个替身。
+先装连接器的 MySQL 驱动和助手，再复制配置。把 `agent/.env` 的 `OPENAI_API_KEY` 改成真实密钥。压缩包不含 `third_party/UnifiedModel`，启动前从 GitHub 下载钉住的提交。UModel 镜像从这里构建，不要改这个目录里的代码。`up` 会占住这个窗口，等到 MySQL 健康检查通过、UModel 开始听 8080，再开第二个窗口提问。
 
 ```sh
-connector/.venv/bin/python -m pip install mysql-mimic
-connector/.venv/bin/python agent/local_lab.py
+python -m venv connector/.venv
+connector/.venv/bin/python -m pip install -e "connector[mysql]" -e agent
+cp rms/.env.example rms/.env
+cp agent/.env.example agent/.env
 ```
 
-另一个窗口。默认走 `run`。加上 `--loop graph` 走同一套检查的 LangGraph：
+```sh
+git clone https://github.com/alibaba/UnifiedModel.git third_party/UnifiedModel
+git -C third_party/UnifiedModel checkout 062377a6dbc394ec0af34dc10680d108b76d2201
+```
+
+```sh
+docker compose --env-file rms/.env -f integration/compose.yaml up --build
+```
 
 ```sh
 connector/.venv/bin/python -m data_agent cand-007 这个人的编制还要招几个人
 connector/.venv/bin/python -m data_agent --loop graph cand-007 这个人的编制还要招几个人
 ```
 
-连真实 UModel 和招聘库：
-
-```sh
-docker compose --env-file rms/.env -f integration/compose.yaml up --build
-connector/.venv/bin/python -m data_agent
-```
-
-Windows 把 `bin` 换成 `Scripts`。
-
 ## 测试
 
-这组测试不访问模型网关，也不访问数据库。非法查询不会调用存储；合法查询会走到注入的执行函数；编号没查全或后续查询没做完时，不收下文字结论。
+这组测试不访问模型网关，也不访问数据库。非法查询不会调用存储；合法查询会走到注入的执行函数；编号没查全或后续查询没做完时，不收下文字结论。`pytest` 和 `ruff` 在连接器的 dev 依赖里，先装再跑。
 
 ```sh
-connector/.venv/bin/python -m pip install -e agent
-cd agent && ../connector/.venv/bin/python -m pytest && ../connector/.venv/bin/python -m ruff check .
+connector/.venv/bin/python -m pip install -e "connector[dev]"
+connector/.venv/bin/python -m pytest agent/tests
+connector/.venv/bin/python -m ruff check agent
 ```
